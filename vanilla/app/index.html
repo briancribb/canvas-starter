@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Canvas Snowfall</title>
+		<style>
+			canvas {
+				display:block;
+				margin: 0 auto;
+				background:#183794;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="canvasContainer"></div>
+		<script src="js/APP.js"></script>
+		<script src="js/Snowflake.js"></script>
+		<script>
+			// By putting this at the end, we can declare classes after we declare everything
+			// in the app. Nothing happens until the app's init function.
+			APP.init();
+		</script>
+	</body>
+</html>
