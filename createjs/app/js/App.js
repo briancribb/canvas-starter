@@ -128,8 +128,11 @@ var APP = {
 				switch(event.which || event.keyCode) {
 					case APP.props.keycodes.SPACE: // left
 						//console.log('SPACE');
-						var paused = !createjs.Ticker.getPaused();
-						createjs.Ticker.setPaused(paused);
+						if (createjs.Ticker.getPaused() === true) {
+							APP.play();
+						} else {
+							APP.pause();
+						}
 						break;
 
 					case APP.props.keycodes.LEFT: // left
