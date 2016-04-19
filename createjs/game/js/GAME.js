@@ -8,19 +8,11 @@ Page Visibility API and Polyfill for vendor prefixes:
 	http://caniuse.com/#feat=pagevisibility
 	http://jsfiddle.net/0GiS0/cAG5N/
 */
-(function(){
+//(function(){
 	/*
 	I like the object structure, but I dont want to expose the game to the console. So I'm putting the whole thing 
 	into a closure. 
 	*/
-
-
-
-
-
-
-
-
 
 	var GAME = {
 		states: {
@@ -46,9 +38,8 @@ Page Visibility API and Polyfill for vendor prefixes:
 				{id:"codeschool_logo", src:"img/2014_09_16_20_43_07_Logo-horizontal.png"}
 				],
 			fpsText : '',
-			snowflakes : [],
-			gravity:80,
-			wind:15
+			Ship : {},
+			asteroids : []
 		},
 		pause: function() {
 			//console.log('GAME.pause()');
@@ -200,32 +191,16 @@ Page Visibility API and Polyfill for vendor prefixes:
 			},
 			createObjects: function() {
 				/* Make all the stuff that will move around on the stage. */
-				/*
+
 				console.log('createObjects()');
 				GAME.props.fpsText = new createjs.Text("Hello World", "14px Arial", GAME.props.textColor);
 				GAME.props.fpsText.textAlign = "right";
 				GAME.props.fpsText.x = GAME.canvas.width - 10;
 				GAME.props.fpsText.y = 10;
 				GAME.stage.addChild(GAME.props.fpsText);
-				*/
 
-				var numFlakes = (GAME.canvas.width/50 * 2) * (GAME.canvas.height/50 * 2);
-
-				for (i = 0; i < numFlakes; i++) {
-					// Randomly placed, but no less than 10 pixels from each side.
-					var tempX = 10 + ( Math.floor( Math.random() * (GAME.canvas.width - 10) ) ),
-						tempY = 10 + ( Math.floor( Math.random() * (GAME.canvas.height - 10) ) ),
-						tempRadius = 2 + ( Math.floor( Math.random() * 4 ) ),
-						tempResistance = (100 - (Math.floor(Math.random() * 50))) / 100; // Random 5 to 15, from 100, then turned into decimal. Ex .85
-
-					var tempSpeed = (tempRadius - 2) * 10;
-					
-					// New Snowflake instance.
-					//var tempSnowflake = new GAME.snowflake( { context:GAME.context, x:tempX, y:tempY, radius:tempRadius, resistance:tempResistance, speed:tempSpeed } );
-					var tempSnowflake = new classes.Snowflake( { canvas:GAME.canvas, id:i, x:tempX, y:tempY, radius:tempRadius, resistance:tempResistance, speed:tempSpeed } );
-					GAME.props.snowflakes.push(tempSnowflake);
-					GAME.stage.addChild(tempSnowflake);
-				}
+				GAME.Ship = new classes.Ship( { x:GAME.canvas.width/2, y:GAME.canvas.height/2 } );
+				GAME.stage.addChild(GAME.Ship);
 			}
 		},
 		tick: function(event) {
@@ -268,43 +243,14 @@ Page Visibility API and Polyfill for vendor prefixes:
 			}
 		},
 		updateObjects : function(elapsed) {
-			var snowflakesArray = GAME.props.snowflakes;
-			//GAME.props.fpsText.text = GAME.getFPS(elapsed);
+			GAME.props.fpsText.text = GAME.getFPS(elapsed);
 			// move 100 pixels per second (elapsedTimeInMS / 1000msPerSecond * pixelsPerSecond):
 			//if (createjs.Ticker.getTicks() % 20 == 0) {
-				//console.log('updateObjects() ticks = ' + createjs.Ticker.getTicks());
-			//	GAME.updateCornerText();
+			//	console.log('updateObjects() ticks = ' + createjs.Ticker.getTicks());
 			//}
-
-			for(var i=0; i<snowflakesArray.length; i++) {
-				//GAME.snowflakes[i].updatePosition(elapsed);
-
-				// vx means "horizontal velocity" and vr means "rotational velocity". Adding them to the x and rotation properties.
-
-
-				snowflakesArray[i].x += ((GAME.props.wind + snowflakesArray[i].speed) * snowflakesArray[i].resistance) * (elapsed);
-				snowflakesArray[i].y += ((GAME.props.gravity + snowflakesArray[i].speed) * snowflakesArray[i].resistance) * (elapsed);
-
-
-				// Preparing velocities for the next frame.
-				//=========================================
-				// wrapping from the left wall.
-				if ( (snowflakesArray[i].x + snowflakesArray[i].radius) < 0 ) {
-					snowflakesArray[i].x = GAME.canvas.width + snowflakesArray[i].radius;
-				}
-				// wrapping from the right wall.
-				if ( (snowflakesArray[i].x - snowflakesArray[i].radius) > GAME.canvas.width ) {
-					snowflakesArray[i].x = 0 - snowflakesArray[i].radius;
-				}
-				// wrapping from the floor.
-				if ( (snowflakesArray[i].y + snowflakesArray[i].radius) > GAME.canvas.height+10) {
-					snowflakesArray[i].y = -10 - snowflakesArray[i].radius;
-				}
-			}
 		}
 	};
 
 	GAME.init('canvasContainer');
-
-})();
+//})();
 

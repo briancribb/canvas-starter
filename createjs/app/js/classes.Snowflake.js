@@ -12,7 +12,7 @@ var classes = classes || {}; // Giving a namespace to the class we're creating. 
 	function Snowflake(settings) {
 		this.Shape_constructor();
 		// Assign properties from what is passed in.
-		this.canvas		= settings.canvas;			// We could just use "stage", but I like writing things in a similar pattern.
+		//this.canvas		= settings.canvas;			// We could just use "stage", but I like writing things in a similar pattern.
 		this.id			= settings.id;				// Optional number id for the Shape, not to be confused with the HTML id attribute.
 			this.name	= "Snowflake_" + this.id;	// We can also give it a text name. Remember this from ActionScript?
 		this.x			= settings.x;
