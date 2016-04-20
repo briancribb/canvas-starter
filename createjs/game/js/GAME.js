@@ -138,10 +138,12 @@ Page Visibility API and Polyfill for vendor prefixes:
 
 						case GAME.props.keycodes.LEFT: // left
 							console.log('LEFT');
+							GAME.Ship.smallCircle();
 							break;
 
 						case GAME.props.keycodes.UP: // up
 							console.log('UP');
+							GAME.Ship.largeCircle();
 							break;
 
 						case GAME.props.keycodes.RIGHT: // right
@@ -150,6 +152,18 @@ Page Visibility API and Polyfill for vendor prefixes:
 
 						case GAME.props.keycodes.DOWN: // down
 							console.log('DOWN');
+							break;
+
+						default: return; // exit this handler for other keys
+					}
+					event.preventDefault(); // prevent the default action (scroll / move caret)
+				};
+				document.onkeyup = function(event) {
+					event = event || window.event;
+					switch(event.which || event.keyCode) {
+						case GAME.props.keycodes.UP: // up
+							console.log('UP');
+							GAME.Ship.smallCircle();
 							break;
 
 						default: return; // exit this handler for other keys
@@ -243,11 +257,11 @@ Page Visibility API and Polyfill for vendor prefixes:
 			}
 		},
 		updateObjects : function(elapsed) {
-			GAME.props.fpsText.text = GAME.getFPS(elapsed);
 			// move 100 pixels per second (elapsedTimeInMS / 1000msPerSecond * pixelsPerSecond):
-			//if (createjs.Ticker.getTicks() % 20 == 0) {
-			//	console.log('updateObjects() ticks = ' + createjs.Ticker.getTicks());
-			//}
+			if (createjs.Ticker.getTicks() % 20 == 0) {
+				GAME.props.fpsText.text = GAME.getFPS(elapsed);
+				//console.log('updateObjects() ticks = ' + createjs.Ticker.getTicks());
+			}
 		}
 	};
 

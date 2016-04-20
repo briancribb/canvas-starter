@@ -12,8 +12,8 @@ var classes = classes || {}; // Giving a namespace to the class we're creating. 
 	function Ship(settings) {
 		this.Shape_constructor();
 		// Assign properties from what is passed in.
-		this.x			= settings.x;
-		this.y			= settings.y;
+		this.x			= settings.x || 0;
+		this.y			= settings.y || 0;
 		//this.width		= 30;						// All of our squares will be the same size.
 		//this.height		= 30;
 		//this.regX		= this.width/2;				// Setting the registration point so we can rotate around the center of the square.
@@ -23,14 +23,12 @@ var classes = classes || {}; // Giving a namespace to the class we're creating. 
 
 		//this.graphics.setStrokeStyle(1).beginStroke("rgba(0,0,0,1)").drawCircle(160,60,40);
 		//this.graphics.beginStroke("#FFF").beginFill("#bad").drawRect(0, 0, this.width, this.height);
-		this.graphics.beginFill("#ffffff").drawCircle(0, 0, 30);
+		this.graphics = grShip;
 	}
 
 	// extend() builds our temporary object up with the parent as it's prototype. It then returns the new prototype, 
 	// so we could give this a shorter variable name if we wanted to.
 	Ship.prototype = createjs.extend(Ship, createjs.Shape);
-
-
 
 	/*
 	Now we're actually going to create the class and use it. Any methods we override will be renamed
@@ -39,5 +37,23 @@ var classes = classes || {}; // Giving a namespace to the class we're creating. 
 	*/
 	
 	classes.Ship = createjs.promote(Ship, "Shape");
+
+	var grShip	=  new createjs.Graphics().beginFill("#ffffff").drawCircle(0, 0, 30),
+		grShip2	=  new createjs.Graphics().beginFill("#ffffff").drawCircle(0, 0, 40);
+
+	Ship.prototype.smallCircle = function() {
+		this.graphics = grShip;
+	}
+	Ship.prototype.largeCircle = function() {
+		this.graphics = grShip2;
+	}
+
+
+
+
+
+
+
+
 
 }());
