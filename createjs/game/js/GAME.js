@@ -34,6 +34,9 @@ Page Visibility API and Polyfill for vendor prefixes:
 				UP: 38,
 				DOWN: 40
 			},
+			shipProps: {
+				THRUST: true
+			},
 			assets: [
 				{id:"codeschool_logo", src:"img/2014_09_16_20_43_07_Logo-horizontal.png"}
 				],
@@ -138,12 +141,11 @@ Page Visibility API and Polyfill for vendor prefixes:
 
 						case GAME.props.keycodes.LEFT: // left
 							console.log('LEFT');
-							GAME.Ship.smallCircle();
 							break;
 
 						case GAME.props.keycodes.UP: // up
 							console.log('UP');
-							GAME.Ship.largeCircle();
+							GAME.props.shipProps.thrust = true;
 							break;
 
 						case GAME.props.keycodes.RIGHT: // right
@@ -162,8 +164,7 @@ Page Visibility API and Polyfill for vendor prefixes:
 					event = event || window.event;
 					switch(event.which || event.keyCode) {
 						case GAME.props.keycodes.UP: // up
-							console.log('UP');
-							GAME.Ship.smallCircle();
+							GAME.props.shipProps.thrust = false;
 							break;
 
 						default: return; // exit this handler for other keys
@@ -262,6 +263,12 @@ Page Visibility API and Polyfill for vendor prefixes:
 				GAME.props.fpsText.text = GAME.getFPS(elapsed);
 				//console.log('updateObjects() ticks = ' + createjs.Ticker.getTicks());
 			}
+			if ( GAME.props.shipProps.thrust  === true ) {
+				GAME.Ship.largeCircle();
+			} else {
+				GAME.Ship.smallCircle();
+			}
+
 		}
 	};
 
