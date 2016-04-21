@@ -25,7 +25,7 @@ Page Visibility API and Polyfill for vendor prefixes:
 			then:null,
 			interval:0,
 			width:600,				// Width of our canvas app. Used when creating the canvas and testing its bounds.
-			height:300,				// Height of our canvas app.
+			height:400,				// Height of our canvas app.
 			textColor: '#FFFD8A',
 			keycodes: {
 				SPACE: 32,
@@ -264,9 +264,9 @@ Page Visibility API and Polyfill for vendor prefixes:
 				//console.log('updateObjects() ticks = ' + createjs.Ticker.getTicks());
 			}
 			if ( GAME.props.shipProps.thrust  === true ) {
-				GAME.Ship.largeCircle();
+				GAME.Ship.thrust(true);
 			} else {
-				GAME.Ship.smallCircle();
+				GAME.Ship.thrust(false);
 			}
 
 		}

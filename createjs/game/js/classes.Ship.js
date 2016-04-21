@@ -38,18 +38,54 @@ var classes = classes || {}; // Giving a namespace to the class we're creating. 
 	
 	classes.Ship = createjs.promote(Ship, "Shape");
 
-	var grShip	=  new createjs.Graphics().beginFill("#ffffff").drawCircle(0, 0, 30),
-		grShip2	=  new createjs.Graphics().beginFill("#ffffff").drawCircle(0, 0, 40);
+	var grShip			=	new createjs.Graphics()
+								.setStrokeStyle(1)
+								.beginFill("#ffffff")
+									.drawCircle(0, 0, 2)
+								.endFill()
+								.beginStroke("#ffffff")
+									.moveTo(0,-10)
+										.lineTo(10,12)
+										.lineTo(0,5)
+										.lineTo(-10,12)
+										.lineTo(0,-10)
+										.setStrokeStyle(2);
 
-	Ship.prototype.smallCircle = function() {
-		this.graphics = grShip;
+
+
+
+
+	var grShipThrust	=	new createjs.Graphics()
+								.setStrokeStyle(1)
+								.beginFill("#ffffff")
+									.drawCircle(0, 0, 2)
+								.endFill()
+								.beginStroke("#ffffff")
+									.moveTo(0,-10)
+										.lineTo(10,12)
+										.lineTo(0,5)
+										.lineTo(-10,12)
+										.lineTo(0,-10)
+										.setStrokeStyle(2)
+
+									.moveTo(-3,10)
+										.lineTo(3,10)
+									.moveTo(0,10)
+										.lineTo(0,15)
+										.lineTo(0,18)
+									.endStroke();
+
+
+
+
+
+	Ship.prototype.thrust = function(active) {
+		if (active === false) {
+			this.graphics = grShip;
+		} else {
+			this.graphics = grShipThrust;
+		}
 	}
-	Ship.prototype.largeCircle = function() {
-		this.graphics = grShip2;
-	}
-
-
-
 
 
 
