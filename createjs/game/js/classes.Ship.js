@@ -19,7 +19,11 @@ var classes = classes || {}; // Giving a namespace to the class we're creating. 
 		//this.regX		= this.width/2;				// Setting the registration point so we can rotate around the center of the square.
 		//this.regY		= this.height/2;
 		//this.rotation	= 0;						// This is the default value anyway, but I wanted to set it here for readability.
-
+		this.vx			= settings.vx || 30;
+		this.vy			= settings.vx || 30;
+		this.vr			= settings.vx || 100;
+		this.thrust		= false;
+		this.turn		= '';
 
 		//this.graphics.setStrokeStyle(1).beginStroke("rgba(0,0,0,1)").drawCircle(160,60,40);
 		//this.graphics.beginStroke("#FFF").beginFill("#bad").drawRect(0, 0, this.width, this.height);
@@ -44,11 +48,11 @@ var classes = classes || {}; // Giving a namespace to the class we're creating. 
 									.drawCircle(0, 0, 2)
 								.endFill()
 								.beginStroke("#ffffff")
-									.moveTo(0,-10)
+									.moveTo(0,-12)
 										.lineTo(10,12)
 										.lineTo(0,5)
 										.lineTo(-10,12)
-										.lineTo(0,-10)
+										.lineTo(0,-12)
 										.setStrokeStyle(2);
 
 
@@ -61,11 +65,11 @@ var classes = classes || {}; // Giving a namespace to the class we're creating. 
 									.drawCircle(0, 0, 2)
 								.endFill()
 								.beginStroke("#ffffff")
-									.moveTo(0,-10)
+									.moveTo(0,-12)
 										.lineTo(10,12)
 										.lineTo(0,5)
 										.lineTo(-10,12)
-										.lineTo(0,-10)
+										.lineTo(0,-12)
 										.setStrokeStyle(2)
 
 									.moveTo(-3,10)
@@ -79,11 +83,16 @@ var classes = classes || {}; // Giving a namespace to the class we're creating. 
 
 
 
-	Ship.prototype.thrust = function(active) {
-		if (active === false) {
+	Ship.prototype.update = function(elapsed) {
+		if (this.thrust === false) {
 			this.graphics = grShip;
 		} else {
 			this.graphics = grShipThrust;
+		}
+		if (this.turn === 'right') {
+			this.rotation += this.vr * elapsed;
+		} else if (this.turn === 'left') {
+			this.rotation -= this.vr * elapsed;
 		}
 	}
 

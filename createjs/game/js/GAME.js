@@ -34,9 +34,6 @@ Page Visibility API and Polyfill for vendor prefixes:
 				UP: 38,
 				DOWN: 40
 			},
-			shipProps: {
-				THRUST: true
-			},
 			assets: [
 				{id:"codeschool_logo", src:"img/2014_09_16_20_43_07_Logo-horizontal.png"}
 				],
@@ -141,15 +138,17 @@ Page Visibility API and Polyfill for vendor prefixes:
 
 						case GAME.props.keycodes.LEFT: // left
 							console.log('LEFT');
+							GAME.Ship.turn = 'left';
 							break;
 
 						case GAME.props.keycodes.UP: // up
 							console.log('UP');
-							GAME.props.shipProps.thrust = true;
+							GAME.Ship.thrust = true;
 							break;
 
 						case GAME.props.keycodes.RIGHT: // right
 							console.log('RIGHT');
+							GAME.Ship.turn = 'right';
 							break;
 
 						case GAME.props.keycodes.DOWN: // down
@@ -164,7 +163,15 @@ Page Visibility API and Polyfill for vendor prefixes:
 					event = event || window.event;
 					switch(event.which || event.keyCode) {
 						case GAME.props.keycodes.UP: // up
-							GAME.props.shipProps.thrust = false;
+							GAME.Ship.thrust = false;
+							break;
+
+						case GAME.props.keycodes.LEFT: // left
+							GAME.Ship.turn = '';
+							break;
+
+						case GAME.props.keycodes.RIGHT: // right
+							GAME.Ship.turn = '';
 							break;
 
 						default: return; // exit this handler for other keys
@@ -214,7 +221,10 @@ Page Visibility API and Polyfill for vendor prefixes:
 				GAME.props.fpsText.y = 10;
 				GAME.stage.addChild(GAME.props.fpsText);
 
-				GAME.Ship = new classes.Ship( { x:GAME.canvas.width/2, y:GAME.canvas.height/2 } );
+				GAME.Ship = new classes.Ship({
+					x:GAME.canvas.width/2, 
+					y:GAME.canvas.height/2
+				});
 				GAME.stage.addChild(GAME.Ship);
 			}
 		},
@@ -263,12 +273,7 @@ Page Visibility API and Polyfill for vendor prefixes:
 				GAME.props.fpsText.text = GAME.getFPS(elapsed);
 				//console.log('updateObjects() ticks = ' + createjs.Ticker.getTicks());
 			}
-			if ( GAME.props.shipProps.thrust  === true ) {
-				GAME.Ship.thrust(true);
-			} else {
-				GAME.Ship.thrust(false);
-			}
-
+			GAME.Ship.update(elapsed);
 		}
 	};
 
