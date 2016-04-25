@@ -17,10 +17,10 @@ var classes = classes || {}; // Giving a namespace to the class we're creating. 
 		this.Shape_constructor() here, but we won't because this is just a base class. It's only purpose is to provide 
 		common functions for all moving objects in the tame. Subclasses will call this.Shape_constructor() in their own 
 		constructor functions.
-		*/
-		
 
-		// Normally we would assign values for x and y and so on. Not doing that because this is just a base class.
+		Normally we would assign values for x and y and so on. Not doing that because this is just a base class. This 
+		exists only to provide common methods to subsequent classes. 
+		*/
 	};
 	/*
 	createjs.extend() builds our temporary object up with the parent as it's prototype. It then returns the new prototype, 

@@ -61,7 +61,6 @@ var classes = classes || {}; // Giving a namespace to the class we're creating. 
 										.lineTo(12,0);
 
 
-
 	var grShipThrust	=	new createjs.Graphics()
 								.setStrokeStyle(1)
 								.beginFill("#ffffff")
@@ -85,9 +84,6 @@ var classes = classes || {}; // Giving a namespace to the class we're creating. 
 									.moveTo(-16,-0)
 										.lineTo(-20,-0)
 									.endStroke();
-
-
-
 
 
 
