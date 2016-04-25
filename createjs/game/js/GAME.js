@@ -15,24 +15,19 @@ Page Visibility API and Polyfill for vendor prefixes:
 	*/
 
 	var GAME = {
-		states: {
-			INIT: "INIT",
-			READY: "READY"
-		},
-		currentState: 'INIT',
 		props: {
 			now:null,				// "now" and "then" get initial values in GAME.setup.addListeners().
 			then:null,
-			interval:0,
 			width:600,				// Width of our canvas app. Used when creating the canvas and testing its bounds.
 			height:400,				// Height of our canvas app.
 			textColor: '#FFFD8A',
 			keycodes: {
-				SPACE: 32,
-				LEFT: 37,
-				RIGHT: 39,
-				UP: 38,
-				DOWN: 40
+				p:		80,
+				SPACE:	32,
+				LEFT:	37,
+				RIGHT:	39,
+				UP:		38,
+				DOWN:	40
 			},
 			assets: [
 				{id:"codeschool_logo", src:"img/2014_09_16_20_43_07_Logo-horizontal.png"}
@@ -42,11 +37,9 @@ Page Visibility API and Polyfill for vendor prefixes:
 			asteroids : []
 		},
 		pause: function() {
-			//console.log('GAME.pause()');
 			createjs.Ticker.paused = true;
 		},
 		play: function() {
-			//console.log('GAME.play()');
 			GAME.props.then = Date.now();	// Resetting the 'then'.
 			createjs.Ticker.paused = false;
 		},
@@ -78,21 +71,20 @@ Page Visibility API and Polyfill for vendor prefixes:
 			queue.on("fileload", handleFileLoad, this);
 			queue.on("complete", handleComplete, this);
 
-			function handleFileLoad(event) {
-				console.log('handleFileLoad()');
+			GAME.state.switch(GAME.state.key.LOADING);
 
+			function handleFileLoad(event) {
 				// Add any images to the page body. Just a temporary thing for testing.
 				if (event.item.type === createjs.LoadQueue.IMAGE) {
 					document.body.appendChild(event.result);
 				}
 			}
 			function handleComplete(event) {
-				console.log('handleComplete()');
 				/* Once assets are loaded, run the rest of the app. */
 				GAME.setup.createObjects();
 				GAME.play();
 				GAME.stage.removeChild(GAME.loadGraphic);
-				GAME.currentState = GAME.states.READY;
+				GAME.state.switch(GAME.state.key.NEW_GAME);
 			}
 		},
 		setup: {
@@ -119,7 +111,7 @@ Page Visibility API and Polyfill for vendor prefixes:
 							GAME.play();
 						}
 						GAME.document_hidden = document[GAME.hidden];
-						console.log('visibilityChange(): GAME.document_hidden = ' + GAME.document_hidden);
+						//console.log('visibilityChange(): GAME.document_hidden = ' + GAME.document_hidden);
 					}
 				});
 
@@ -127,8 +119,7 @@ Page Visibility API and Polyfill for vendor prefixes:
 				document.onkeydown = function(event) {
 					event = event || window.event;
 					switch(event.which || event.keyCode) {
-						case GAME.props.keycodes.SPACE: // left
-							//console.log('SPACE');
+						case GAME.props.keycodes.p: // p
 							if (createjs.Ticker.getPaused() === true) {
 								GAME.play();
 							} else {
@@ -137,22 +128,18 @@ Page Visibility API and Polyfill for vendor prefixes:
 							break;
 
 						case GAME.props.keycodes.LEFT: // left
-							console.log('LEFT');
 							GAME.Ship.turn = 'left';
 							break;
 
 						case GAME.props.keycodes.UP: // up
-							console.log('UP');
 							GAME.Ship.thrust = true;
 							break;
 
 						case GAME.props.keycodes.RIGHT: // right
-							console.log('RIGHT');
 							GAME.Ship.turn = 'right';
 							break;
 
 						case GAME.props.keycodes.DOWN: // down
-							console.log('DOWN');
 							break;
 
 						default: return; // exit this handler for other keys
@@ -182,8 +169,8 @@ Page Visibility API and Polyfill for vendor prefixes:
 
 				// CreateJS Ticker
 				createjs.Ticker.on("tick", GAME.tick);
-				GAME.props.now = Date.now();							// Instantiating the 'now'.
-				GAME.props.then = createjs.Ticker.now;				// Instantiating the 'then'.
+				GAME.props.now = Date.now();					// Instantiating the 'now'.
+				GAME.props.then = createjs.Ticker.now;			// Instantiating the 'then'.
 
 
 				/*
@@ -226,22 +213,14 @@ Page Visibility API and Polyfill for vendor prefixes:
 					y:GAME.canvas.height/2
 				});
 				GAME.stage.addChild(GAME.Ship);
+
 			}
 		},
 		tick: function(event) {
 
 			if ( createjs.Ticker.paused === false ) {
-				GAME.updateInterval();
-				switch(GAME.currentState) {
-					case 'INIT':
-						//console.log('GAME.tick() - INIT: ' + GAME.currentState);
-						GAME.updateloadGraphic(GAME.props.interval);
-						break;
-					default:
-						//console.log('GAME.tick() - READY: ' + GAME.currentState);
-						//console.log( 'Time: ' + (GAME.props.now) );
-						GAME.updateObjects(GAME.props.interval);
-				}
+				//GAME.updateInterval();
+				GAME.state.currentFunc( GAME.updateInterval() );
 				GAME.stage.update(event); // important!!
 			}
 		},
@@ -257,23 +236,106 @@ Page Visibility API and Polyfill for vendor prefixes:
 		},
 		updateInterval: function() {
 			GAME.props.now = Date.now();
-			GAME.props.interval = (GAME.props.now - GAME.props.then) / 1000;// seconds since last frame.
+			var interval = (GAME.props.now - GAME.props.then) / 1000;// seconds since last frame.
 			GAME.props.then = GAME.props.now;
+			return interval;
 		},
-		updateloadGraphic : function(elapsed) {
-			/* Simple logic to update the loading graphic while the user waits for assets. */
-			GAME.loadGraphic.x += elapsed/1000*100;
-			if (GAME.loadGraphic.x > GAME.canvas.width) {
-				GAME.loadGraphic.x -= GAME.canvas.width;
+		state: {
+			key			: {
+				LOADING:		0,
+				TITLE:			1,
+				NEW_GAME:		2,
+				NEW_LEVEL:		3,
+				PLAYER_START:	4,
+				PLAYER_LEVEL:	5,
+				PLAYER_DIE:		6,
+				GAME_OVER:		7
+			},
+			current				: 0,
+			currentFunc			: null,
+			switch : function(newState){
+				GAME.state.current = newState;
+
+				switch (GAME.state.current) {
+					case GAME.state.key.LOADING:
+						GAME.state.currentFunc = GAME.state.LOADING;
+						break;
+					case GAME.state.key.TITLE:
+						GAME.state.currentFunc = GAME.state.TITLE;
+						break;
+					case GAME.state.key.NEW_GAME:
+						GAME.state.currentFunc = GAME.state.NEW_GAME;
+						break;
+					case GAME.state.key.NEW_LEVEL:
+						GAME.state.currentFunc = GAME.state.NEW_LEVEL;
+						break;
+					case GAME.state.key.PLAYER_START:
+						GAME.state.currentFunc = GAME.state.PLAYER_START;
+						break;
+					case GAME.state.key.PLAYER_LEVEL:
+						GAME.state.currentFunc = GAME.state.PLAYER_LEVEL;
+						break;
+					case GAME.state.key.PLAYER_DIE:
+						GAME.state.currentFunc = GAME.state.PLAYER_DIE;
+						break;
+					case GAME.state.key.GAME_OVER:
+						GAME.state.currentFunc = GAME.state.GAME_OVER;
+						break;
+				}
+			},
+			LOADING : function(elapsed){
+				/* Simple logic to update the loading graphic while the user waits for assets. */
+				GAME.loadGraphic.x += elapsed/1000*100;
+				if (GAME.loadGraphic.x > GAME.canvas.width) {
+					GAME.loadGraphic.x -= GAME.canvas.width;
+				}
+			},
+			TITLE : function(elapsed){
+
+
+
+			},
+			NEW_GAME : function(elapsed){
+				// move 100 pixels per second (elapsedTimeInMS / 1000msPerSecond * pixelsPerSecond):
+				if (createjs.Ticker.getTicks() % 20 == 0) {
+					GAME.props.fpsText.text = GAME.getFPS(elapsed);
+				}
+				GAME.Ship.update(elapsed);
+
+				for (var i = 0; i < GAME.stage.children.length; i++) {
+					var child = GAME.stage.children[i],
+						bounds = GAME.stage.children[i].getBounds();
+
+					// Wrap vertically
+					if ( child.y < (0 - bounds.height) ) {
+						child.y = GAME.canvas.height + 10;
+					} else if ( child.y > GAME.canvas.height + 10 ) {
+						child.y = 0 - bounds.height;
+					}
+
+					// Wrap horizontally
+					if ( child.x > GAME.canvas.width + bounds.width ) {
+						child.x = -10 - bounds.width;
+					} else if ( child.x < -10 - bounds.width ) {
+						child.x = GAME.canvas.width;
+					}
+				};
+			},
+			NEW_LEVEL : function(elapsed){
+
+			},
+			PLAYER_START : function(elapsed){
+
+			},
+			PLAYER_LEVEL : function(elapsed){
+
+			},
+			PLAYER_DIE : function(elapsed){
+
+			},
+			GAME_OVER : function(elapsed){
+
 			}
-		},
-		updateObjects : function(elapsed) {
-			// move 100 pixels per second (elapsedTimeInMS / 1000msPerSecond * pixelsPerSecond):
-			if (createjs.Ticker.getTicks() % 20 == 0) {
-				GAME.props.fpsText.text = GAME.getFPS(elapsed);
-				//console.log('updateObjects() ticks = ' + createjs.Ticker.getTicks());
-			}
-			GAME.Ship.update(elapsed);
 		}
 	};
 

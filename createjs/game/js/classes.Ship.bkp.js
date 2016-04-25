@@ -37,7 +37,7 @@ var classes = classes || {}; // Giving a namespace to the class we're creating. 
 
 	// extend() builds our temporary object up with the parent as it's prototype. It then returns the new prototype, 
 	// so we could give this a shorter variable name if we wanted to.
-	Ship.prototype = createjs.extend(Ship, classes.Mover);
+	Ship.prototype = createjs.extend(Ship, createjs.Shape);
 
 	/*
 	Now we're actually going to create the class and use it. Any methods we override will be renamed
@@ -45,7 +45,7 @@ var classes = classes || {}; // Giving a namespace to the class we're creating. 
 	object to avoid polluting the global namespace.
 	*/
 	
-	classes.Ship = createjs.promote(Ship, classes.Mover);
+	classes.Ship = createjs.promote(Ship, "Shape");
 
 
 	var grShip			=	new createjs.Graphics()
