@@ -29,6 +29,7 @@ Page Visibility API and Polyfill for vendor prefixes:
 				UP:		38,
 				DOWN:	40
 			},
+			keyFunctions() {},
 			assets: [
 				{id:"codeschool_logo", src:"img/2014_09_16_20_43_07_Logo-horizontal.png"}
 				],
@@ -71,7 +72,7 @@ Page Visibility API and Polyfill for vendor prefixes:
 			queue.on("fileload", handleFileLoad, this);
 			queue.on("complete", handleComplete, this);
 
-			GAME.state.switch(GAME.state.key.LOADING);
+			GAME.state.swap('LOADING');
 
 			function handleFileLoad(event) {
 				// Add any images to the page body. Just a temporary thing for testing.
@@ -84,7 +85,7 @@ Page Visibility API and Polyfill for vendor prefixes:
 				GAME.setup.createObjects();
 				GAME.play();
 				GAME.stage.removeChild(GAME.loadGraphic);
-				GAME.state.switch(GAME.state.key.NEW_GAME);
+				GAME.state.swap('NEW_GAME');
 			}
 		},
 		setup: {
@@ -220,7 +221,7 @@ Page Visibility API and Polyfill for vendor prefixes:
 
 			if ( createjs.Ticker.paused === false ) {
 				//GAME.updateInterval();
-				GAME.state.currentFunc( GAME.updateInterval() );
+				GAME.state.current.frame( GAME.updateInterval() );
 				GAME.stage.update(event); // important!!
 			}
 		},
@@ -252,74 +253,107 @@ Page Visibility API and Polyfill for vendor prefixes:
 				GAME_OVER:		7
 			},
 			current				: 0,
-			currentFunc			: null,
-			switch : function(newState){
+			//update			: null,
+			swap : function(newState){
+				console.log('swap: ' + newState);
+				GAME.state.current = GAME.state[newState];
+				GAME.state.current.setup();
+				/*
 				GAME.state.current = newState;
 
 				switch (GAME.state.current) {
 					case GAME.state.key.LOADING:
-						GAME.state.currentFunc = GAME.state.LOADING;
+						GAME.state.update = GAME.state.LOADING;
 						break;
 					case GAME.state.key.TITLE:
-						GAME.state.currentFunc = GAME.state.TITLE;
+						GAME.state.update = GAME.state.TITLE;
 						break;
 					case GAME.state.key.NEW_GAME:
-						GAME.state.currentFunc = GAME.state.NEW_GAME;
+						GAME.state.update = GAME.state.NEW_GAME;
 						break;
 					case GAME.state.key.NEW_LEVEL:
-						GAME.state.currentFunc = GAME.state.NEW_LEVEL;
+						GAME.state.update = GAME.state.NEW_LEVEL;
 						break;
 					case GAME.state.key.PLAYER_START:
-						GAME.state.currentFunc = GAME.state.PLAYER_START;
+						GAME.state.update = GAME.state.PLAYER_START;
 						break;
 					case GAME.state.key.PLAYER_LEVEL:
-						GAME.state.currentFunc = GAME.state.PLAYER_LEVEL;
+						GAME.state.update = GAME.state.PLAYER_LEVEL;
 						break;
 					case GAME.state.key.PLAYER_DIE:
-						GAME.state.currentFunc = GAME.state.PLAYER_DIE;
+						GAME.state.update = GAME.state.PLAYER_DIE;
 						break;
 					case GAME.state.key.GAME_OVER:
-						GAME.state.currentFunc = GAME.state.GAME_OVER;
+						GAME.state.update = GAME.state.GAME_OVER;
 						break;
 				}
+				*/
 			},
-			LOADING : function(elapsed){
-				/* Simple logic to update the loading graphic while the user waits for assets. */
-				GAME.loadGraphic.x += elapsed/1000*100;
-				if (GAME.loadGraphic.x > GAME.canvas.width) {
-					GAME.loadGraphic.x -= GAME.canvas.width;
+			LOADING : {
+				setup : function(elapsed){
+					// Any one-time tasks that happen when we switch to this state.
+					console.log('LOADING: setup()');
+				},
+				frame : function(elapsed){
+					// State function to run on each tick.
+					/* Simple logic to update the loading graphic while the user waits for assets. */
+					GAME.loadGraphic.x += elapsed/1000*100;
+					if (GAME.loadGraphic.x > GAME.canvas.width) {
+						GAME.loadGraphic.x -= GAME.canvas.width;
+					}
+				},
+				cleanup : function(elapsed){
+					console.log('LOADING: cleanup()');
 				}
 			},
-			TITLE : function(elapsed){
-
-
-
-			},
-			NEW_GAME : function(elapsed){
-				// move 100 pixels per second (elapsedTimeInMS / 1000msPerSecond * pixelsPerSecond):
-				if (createjs.Ticker.getTicks() % 20 == 0) {
-					GAME.props.fpsText.text = GAME.getFPS(elapsed);
+			TITLE : {
+				setup : function(elapsed){
+					// Any one-time tasks that happen when we switch to this state.
+					
+				},
+				frame : function(elapsed){
+					// State function to run on each tick.
+					
+				},
+				cleanup : function(elapsed){
+					
 				}
-				GAME.Ship.update(elapsed);
-
-				for (var i = 0; i < GAME.stage.children.length; i++) {
-					var child = GAME.stage.children[i],
-						bounds = GAME.stage.children[i].getBounds();
-
-					// Wrap vertically
-					if ( child.y < (0 - bounds.height) ) {
-						child.y = GAME.canvas.height + 10;
-					} else if ( child.y > GAME.canvas.height + 10 ) {
-						child.y = 0 - bounds.height;
+			},
+			NEW_GAME : {
+				setup : function(){
+					// Any one-time tasks that happen when we switch to this state.
+					console.log('NEW_GAME: setup()');
+				},
+				frame : function(elapsed){
+					// State function to run on each tick.
+					// move 100 pixels per second (elapsedTimeInMS / 1000msPerSecond * pixelsPerSecond):
+					if (createjs.Ticker.getTicks() % 20 == 0) {
+						GAME.props.fpsText.text = GAME.getFPS(elapsed);
 					}
+					GAME.Ship.update(elapsed);
 
-					// Wrap horizontally
-					if ( child.x > GAME.canvas.width + bounds.width ) {
-						child.x = -10 - bounds.width;
-					} else if ( child.x < -10 - bounds.width ) {
-						child.x = GAME.canvas.width;
-					}
-				};
+					for (var i = 0; i < GAME.stage.children.length; i++) {
+						var child = GAME.stage.children[i],
+							bounds = GAME.stage.children[i].getBounds();
+
+						// Wrap vertically
+						if ( child.y < (0 - bounds.height) ) {
+							child.y = GAME.canvas.height + 10;
+						} else if ( child.y > GAME.canvas.height + 10 ) {
+							child.y = 0 - bounds.height;
+						}
+
+						// Wrap horizontally
+						if ( child.x > GAME.canvas.width + bounds.width ) {
+							child.x = -10 - bounds.width;
+						} else if ( child.x < -10 - bounds.width ) {
+							child.x = GAME.canvas.width;
+						}
+					};
+				},
+				cleanup : function(){
+					console.log('NEW_GAME: cleanup()');
+				}
 			},
 			NEW_LEVEL : function(elapsed){
 
