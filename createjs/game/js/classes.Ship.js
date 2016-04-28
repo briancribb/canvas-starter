@@ -25,7 +25,7 @@ var classes = classes || {}; // Giving a namespace to the class we're creating. 
 		this.vy				= 0;
 		this.vr				= settings.vx || 130;
 		this.accel			= 5;
-		this.maxVelocity	= 400;
+		this.maxVelocity	= 100;
 		this.thrust			= false;
 		this.turn			= '';
 
@@ -101,11 +101,19 @@ var classes = classes || {}; // Giving a namespace to the class we're creating. 
 			var vxNew = this.vx+this.accel*this.cos,
 				vyNew = this.vy+this.accel*this.sin
 
-			var currentVelocity = Math.sqrt ( Math.pow(vxNew, 2) + Math.pow(vyNew, 2) );
-			currentVelocity = (currentVelocity > this.maxVelocity) ? this.maxVelocity : currentVelocity;
+			//var currentVelocity = Math.sqrt ( Math.pow(vxNew, 2) + Math.pow(vyNew, 2) );
+			//currentVelocity = (currentVelocity > this.maxVelocity) ? this.maxVelocity : currentVelocity;
 
-			this.vx = vxNew;
-			this.vy = vyNew;
+			console.log('this.vx = ' + this.vx + ', this.vy = ' + this.vy);
+			//console.log('currentVelocity = ' + (  ) );
+
+			if (vxNew < this.maxVelocity) {
+				this.vx = vxNew;
+			}
+			if (vyNew < this.maxVelocity) {
+				this.vy = vyNew;
+			}
+
 
 		}
 		if (this.turn === 'right') {
