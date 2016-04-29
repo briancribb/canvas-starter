@@ -25,7 +25,7 @@ var classes = classes || {}; // Giving a namespace to the class we're creating. 
 		this.vy				= 0;
 		this.vr				= settings.vx || 130;
 		this.accel			= 5;
-		this.maxVelocity	= 400;
+		this.maxVelocity	= 100;
 		this.thrust			= false;
 		this.turn			= '';
 
@@ -114,9 +114,6 @@ var classes = classes || {}; // Giving a namespace to the class we're creating. 
 				vyNew = this.maxVelocity;
 			}
 
-			this.vx = vxNew;
-			this.vy = vyNew;
-
 		}
 		if (this.turn === 'right') {
 			this.rotation += this.vr * elapsed;
@@ -126,10 +123,5 @@ var classes = classes || {}; // Giving a namespace to the class we're creating. 
 		this.x += (this.vx * elapsed);
 		this.y += (this.vy * elapsed);
 	}
-
-
-
-
-
 
 }());
