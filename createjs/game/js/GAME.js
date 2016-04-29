@@ -251,8 +251,6 @@ Page Visibility API and Polyfill for vendor prefixes:
 					myText.y = 10;
 					myText.name = 'myText';
 					GAME.stage.addChild(myText);
-					
-
 				},
 				frame : function(elapsed){
 					// State function to run on each tick.
@@ -348,20 +346,45 @@ Page Visibility API and Polyfill for vendor prefixes:
 					console.log('NEW_GAME: cleanup()');
 				}
 			},
-			NEW_LEVEL : function(elapsed){
-
+			NEW_LEVEL : {
+				setup : function(elapsed){
+				},
+				frame : function(elapsed){
+				},
+				cleanup : function(elapsed){
+				}
 			},
-			PLAYER_START : function(elapsed){
-
+			PLAYER_START : {
+				setup : function(elapsed){
+				},
+				frame : function(elapsed){
+				},
+				cleanup : function(elapsed){
+				}
 			},
-			PLAYER_LEVEL : function(elapsed){
- 
+			PLAYER_LEVEL : {
+				setup : function(elapsed){
+				},
+				frame : function(elapsed){
+				},
+				cleanup : function(elapsed){
+				}
 			},
-			PLAYER_DIE : function(elapsed){
-
+			PLAYER_DIE : {
+				setup : function(elapsed){
+				},
+				frame : function(elapsed){
+				},
+				cleanup : function(elapsed){
+				}
 			},
-			GAME_OVER : function(elapsed){
-
+			GAME_OVER : {
+				setup : function(elapsed){
+				},
+				frame : function(elapsed){
+				},
+				cleanup : function(elapsed){
+				}
 			}
 		}
 	};
