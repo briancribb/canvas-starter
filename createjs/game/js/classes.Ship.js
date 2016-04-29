@@ -101,8 +101,18 @@ var classes = classes || {}; // Giving a namespace to the class we're creating. 
 			var vxNew = this.vx+this.accel*this.cos,
 				vyNew = this.vy+this.accel*this.sin
 
-			var currentVelocity = Math.sqrt ( Math.pow(vxNew, 2) + Math.pow(vyNew, 2) );
-			currentVelocity = (currentVelocity > this.maxVelocity) ? this.maxVelocity : currentVelocity;
+
+			if ( vxNew < -(this.maxVelocity) ) {
+				vxNew = -(this.maxVelocity);
+			} else if ( vxNew > this.maxVelocity ) {
+				vxNew = this.maxVelocity;
+			}
+
+			if ( vyNew < -(this.maxVelocity) ) {
+				vyNew = -(this.maxVelocity);
+			} else if ( vyNew > this.maxVelocity ) {
+				vyNew = this.maxVelocity;
+			}
 
 			this.vx = vxNew;
 			this.vy = vyNew;

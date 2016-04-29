@@ -29,12 +29,16 @@ Page Visibility API and Polyfill for vendor prefixes:
 				UP:		38,
 				DOWN:	40
 			},
-			keyFunctions() {},
+			handlers: {
+				onkeydown:function(){return;},
+				onkeyup:function(){return;}
+			},
 			assets: [
 				{id:"codeschool_logo", src:"img/2014_09_16_20_43_07_Logo-horizontal.png"}
 				],
 			fpsText : '',
 			Ship : {},
+			controls : {},
 			asteroids : []
 		},
 		pause: function() {
@@ -72,7 +76,7 @@ Page Visibility API and Polyfill for vendor prefixes:
 			queue.on("fileload", handleFileLoad, this);
 			queue.on("complete", handleComplete, this);
 
-			GAME.state.swap('LOADING');
+			GAME.state.swap('LOADING', true);
 
 			function handleFileLoad(event) {
 				// Add any images to the page body. Just a temporary thing for testing.
@@ -85,7 +89,7 @@ Page Visibility API and Polyfill for vendor prefixes:
 				GAME.setup.createObjects();
 				GAME.play();
 				GAME.stage.removeChild(GAME.loadGraphic);
-				GAME.state.swap('NEW_GAME');
+				GAME.state.swap('TITLE');
 			}
 		},
 		setup: {
@@ -118,52 +122,11 @@ Page Visibility API and Polyfill for vendor prefixes:
 
 				// http://stackoverflow.com/questions/1402698/binding-arrow-keys-in-js-jquery
 				document.onkeydown = function(event) {
-					event = event || window.event;
-					switch(event.which || event.keyCode) {
-						case GAME.props.keycodes.p: // p
-							if (createjs.Ticker.getPaused() === true) {
-								GAME.play();
-							} else {
-								GAME.pause();
-							}
-							break;
-
-						case GAME.props.keycodes.LEFT: // left
-							GAME.Ship.turn = 'left';
-							break;
-
-						case GAME.props.keycodes.UP: // up
-							GAME.Ship.thrust = true;
-							break;
-
-						case GAME.props.keycodes.RIGHT: // right
-							GAME.Ship.turn = 'right';
-							break;
-
-						case GAME.props.keycodes.DOWN: // down
-							break;
-
-						default: return; // exit this handler for other keys
-					}
+					GAME.props.handlers.onkeydown( event || window.event );
 					event.preventDefault(); // prevent the default action (scroll / move caret)
 				};
 				document.onkeyup = function(event) {
-					event = event || window.event;
-					switch(event.which || event.keyCode) {
-						case GAME.props.keycodes.UP: // up
-							GAME.Ship.thrust = false;
-							break;
-
-						case GAME.props.keycodes.LEFT: // left
-							GAME.Ship.turn = '';
-							break;
-
-						case GAME.props.keycodes.RIGHT: // right
-							GAME.Ship.turn = '';
-							break;
-
-						default: return; // exit this handler for other keys
-					}
+					GAME.props.handlers.onkeyup( event || window.event );
 					event.preventDefault(); // prevent the default action (scroll / move caret)
 				};
 
@@ -190,6 +153,10 @@ Page Visibility API and Polyfill for vendor prefixes:
 				*/
 				createjs.Ticker.timingMode = createjs.Ticker.RAF;
 			},
+			resetListeners: function() {
+				GAME.props.handlers.onkeydown = function(){return;};
+				GAME.props.handlers.onkeyup = function(){return;};
+			},
 			createloadGraphic: function() {
 				console.log('createloadGraphic()');
 				/* Some small animation that does not require external assets. This will play until the all of assets in the manifest are loaded. */
@@ -200,25 +167,17 @@ Page Visibility API and Polyfill for vendor prefixes:
 				GAME.stage.addChild(GAME.loadGraphic);
 			},
 			createObjects: function() {
-				/* Make all the stuff that will move around on the stage. */
-
+				/* Make all the stuff that will always remain on the stage. */
 				console.log('createObjects()');
 				GAME.props.fpsText = new createjs.Text("Hello World", "14px Arial", GAME.props.textColor);
 				GAME.props.fpsText.textAlign = "right";
 				GAME.props.fpsText.x = GAME.canvas.width - 10;
 				GAME.props.fpsText.y = 10;
+				GAME.props.fpsText.name = 'fpsText';
 				GAME.stage.addChild(GAME.props.fpsText);
-
-				GAME.Ship = new classes.Ship({
-					x:GAME.canvas.width/2, 
-					y:GAME.canvas.height/2
-				});
-				GAME.stage.addChild(GAME.Ship);
-
 			}
 		},
 		tick: function(event) {
-
 			if ( createjs.Ticker.paused === false ) {
 				//GAME.updateInterval();
 				GAME.state.current.frame( GAME.updateInterval() );
@@ -242,52 +201,15 @@ Page Visibility API and Polyfill for vendor prefixes:
 			return interval;
 		},
 		state: {
-			key			: {
-				LOADING:		0,
-				TITLE:			1,
-				NEW_GAME:		2,
-				NEW_LEVEL:		3,
-				PLAYER_START:	4,
-				PLAYER_LEVEL:	5,
-				PLAYER_DIE:		6,
-				GAME_OVER:		7
-			},
-			current				: 0,
+			current				: null,
 			//update			: null,
-			swap : function(newState){
+			swap : function(newState, init){
 				console.log('swap: ' + newState);
+				if (init !== true) {
+					GAME.state.current.cleanup();
+				}
 				GAME.state.current = GAME.state[newState];
 				GAME.state.current.setup();
-				/*
-				GAME.state.current = newState;
-
-				switch (GAME.state.current) {
-					case GAME.state.key.LOADING:
-						GAME.state.update = GAME.state.LOADING;
-						break;
-					case GAME.state.key.TITLE:
-						GAME.state.update = GAME.state.TITLE;
-						break;
-					case GAME.state.key.NEW_GAME:
-						GAME.state.update = GAME.state.NEW_GAME;
-						break;
-					case GAME.state.key.NEW_LEVEL:
-						GAME.state.update = GAME.state.NEW_LEVEL;
-						break;
-					case GAME.state.key.PLAYER_START:
-						GAME.state.update = GAME.state.PLAYER_START;
-						break;
-					case GAME.state.key.PLAYER_LEVEL:
-						GAME.state.update = GAME.state.PLAYER_LEVEL;
-						break;
-					case GAME.state.key.PLAYER_DIE:
-						GAME.state.update = GAME.state.PLAYER_DIE;
-						break;
-					case GAME.state.key.GAME_OVER:
-						GAME.state.update = GAME.state.GAME_OVER;
-						break;
-				}
-				*/
 			},
 			LOADING : {
 				setup : function(elapsed){
@@ -308,28 +230,99 @@ Page Visibility API and Polyfill for vendor prefixes:
 			},
 			TITLE : {
 				setup : function(elapsed){
-					// Any one-time tasks that happen when we switch to this state.
+					console.log('TITLE: setup()');
+					GAME.props.handlers.onkeydown = function(event) {
+						switch(event.which || event.keyCode) {
+							case GAME.props.keycodes.SPACE: // left
+								console.log('Hit the space bar.');
+								GAME.state.swap('NEW_GAME');
+								break;
+
+							default: return; // exit this handler for other keys
+						}
+					}
+					GAME.props.handlers.onkeyup = function() {return;};
+
+
+					/* Creating the title screen. */
+					var myText = new createjs.Text("Test", "14px Arial", "#ffffff");
+					myText.textAlign = "left";
+					myText.x = 10;
+					myText.y = 10;
+					myText.name = 'myText';
+					GAME.stage.addChild(myText);
 					
+
 				},
 				frame : function(elapsed){
 					// State function to run on each tick.
-					
+					if (createjs.Ticker.getTicks() % 20 == 0) {
+						GAME.props.fpsText.text = GAME.getFPS(elapsed);
+					}
 				},
 				cleanup : function(elapsed){
-					
+					console.log('TITLE: cleanup()');
 				}
 			},
 			NEW_GAME : {
 				setup : function(){
 					// Any one-time tasks that happen when we switch to this state.
 					console.log('NEW_GAME: setup()');
+					GAME.props.handlers.onkeydown = function(event) {
+						switch(event.which || event.keyCode) {
+							case GAME.props.keycodes.p: // p
+								if (createjs.Ticker.getPaused() === true) {
+									GAME.play();
+								} else {
+									GAME.pause();
+								}
+								break;
+
+							case GAME.props.keycodes.LEFT: // left
+								GAME.Ship.turn = 'left';
+								break;
+
+							case GAME.props.keycodes.UP: // up
+								GAME.Ship.thrust = true;
+								break;
+
+							case GAME.props.keycodes.RIGHT: // right
+								GAME.Ship.turn = 'right';
+								break;
+
+							case GAME.props.keycodes.DOWN: // down
+								break;
+
+							default: return; // exit this handler for other keys
+						}
+					}
+					GAME.props.handlers.onkeyup = function(event) {
+						switch(event.which || event.keyCode) {
+							case GAME.props.keycodes.UP: // up
+								GAME.Ship.thrust = false;
+								break;
+
+							case GAME.props.keycodes.LEFT: // left
+								GAME.Ship.turn = '';
+								break;
+
+							case GAME.props.keycodes.RIGHT: // right
+								GAME.Ship.turn = '';
+								break;
+
+							default: return; // exit this handler for other keys
+						}
+					}
+
+					GAME.Ship = new classes.Ship({
+						x:GAME.canvas.width/2, 
+						y:GAME.canvas.height/2
+					});
+					GAME.stage.addChild(GAME.Ship);
 				},
 				frame : function(elapsed){
 					// State function to run on each tick.
 					// move 100 pixels per second (elapsedTimeInMS / 1000msPerSecond * pixelsPerSecond):
-					if (createjs.Ticker.getTicks() % 20 == 0) {
-						GAME.props.fpsText.text = GAME.getFPS(elapsed);
-					}
 					GAME.Ship.update(elapsed);
 
 					for (var i = 0; i < GAME.stage.children.length; i++) {
@@ -362,7 +355,7 @@ Page Visibility API and Polyfill for vendor prefixes:
 
 			},
 			PLAYER_LEVEL : function(elapsed){
-
+ 
 			},
 			PLAYER_DIE : function(elapsed){
 
