@@ -25,7 +25,7 @@ var classes = classes || {}; // Giving a namespace to the class we're creating. 
 		this.vy				= 0;
 		this.vr				= settings.vx || 130;
 		this.accel			= 5;
-		this.maxVelocity	= 100;
+		this.maxVelocity	= 400;
 		this.thrust			= false;
 		this.turn			= '';
 
@@ -91,7 +91,6 @@ var classes = classes || {}; // Giving a namespace to the class we're creating. 
 		if (this.thrust === false) {
 			this.graphics = grShip;
 		} else {
-
 			var radians = this.rotation * Math.PI / 180;
 			this.cos = Math.cos(radians);
 			this.sin = Math.sin(radians);
@@ -114,6 +113,8 @@ var classes = classes || {}; // Giving a namespace to the class we're creating. 
 				vyNew = this.maxVelocity;
 			}
 
+			this.vx = vxNew;
+			this.vy = vyNew;
 		}
 		if (this.turn === 'right') {
 			this.rotation += this.vr * elapsed;

@@ -38,5 +38,20 @@ var classes = classes || {}; // Giving a namespace to the class we're creating. 
 	Mover.prototype.explode = function() {
 		return 'explode: this.x = ' + this.x;
 	}
+	Mover.prototype.bestowVector = function(course, speed) {
+		console.log('bestowVector');
+		/*
+		Set the vx and vy to a given course and speed. Course is a regular angle from 0-360 degrees, and speed is the 
+		number of pixels per second the display object should move.
+		*/
 
+		var radians = course * Math.PI / 180;
+		var cos = Math.cos(radians),
+			sin = Math.sin(radians);
+
+		return {
+			vx: speed * cos,
+			vy: speed * sin
+		}
+	}
 }());

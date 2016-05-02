@@ -35,11 +35,26 @@ Page Visibility API and Polyfill for vendor prefixes:
 			},
 			assets: [
 				{id:"codeschool_logo", src:"img/2014_09_16_20_43_07_Logo-horizontal.png"}
-				],
-			fpsText : '',
-			Ship : {},
-			controls : {},
-			asteroids : []
+			],
+		},
+		score:0,
+		ship : {},
+		rocks : [],
+		saucers : [],
+		missiles : [],
+		particles : [],
+		enemyMissiles : [],
+		level:{
+			current:1,
+			maxRocks:20,
+			rockBaseSpeed: 40,
+			rockSpeedMod: 10,
+			maxMissiles: 6,
+			missileSpeed: 150,
+			knobs: {
+				numRocks: 3,
+				rockSpeed:0
+			}
 		},
 		pause: function() {
 			createjs.Ticker.paused = true;
@@ -245,12 +260,28 @@ Page Visibility API and Polyfill for vendor prefixes:
 
 
 					/* Creating the title screen. */
-					var myText = new createjs.Text("Test", "14px Arial", "#ffffff");
-					myText.textAlign = "left";
-					myText.x = 10;
-					myText.y = 10;
-					myText.name = 'myText';
-					GAME.stage.addChild(myText);
+					var score = new createjs.Text( 'Score: ' + GAME.score, '14px Arial', '#ffffff' );
+					score.textAlign = "left";
+					score.x = 10;
+					score.y = 10;
+					score.name = 'score';
+					GAME.stage.addChild(score);
+
+
+					var title = new createjs.Text( 'Asteroids Example Type Game', '18px Arial', '#ffffff' );
+					title.textAlign = "center";
+					title.x = GAME.canvas.width/2;
+					title.y = GAME.canvas.height/2 - 20;
+					title.name = 'title';
+					GAME.stage.addChild(title);
+
+
+					var subtitle = new createjs.Text( 'Press spacebar to continue...', '12px Arial', '#ffffff' );
+					subtitle.textAlign = "center";
+					subtitle.x = GAME.canvas.width/2;
+					subtitle.y = GAME.canvas.height/2 + 10;
+					subtitle.name = 'subtitle';
+					GAME.stage.addChild(subtitle);
 				},
 				frame : function(elapsed){
 					// State function to run on each tick.
@@ -260,6 +291,9 @@ Page Visibility API and Polyfill for vendor prefixes:
 				},
 				cleanup : function(elapsed){
 					console.log('TITLE: cleanup()');
+					// Remove the title stuff, but leave the score.
+					GAME.stage.removeChild( GAME.stage.getChildByName('title') );
+					GAME.stage.removeChild( GAME.stage.getChildByName('subtitle') );
 				}
 			},
 			NEW_GAME : {
@@ -277,15 +311,15 @@ Page Visibility API and Polyfill for vendor prefixes:
 								break;
 
 							case GAME.props.keycodes.LEFT: // left
-								GAME.Ship.turn = 'left';
+								GAME.ship.turn = 'left';
 								break;
 
 							case GAME.props.keycodes.UP: // up
-								GAME.Ship.thrust = true;
+								GAME.ship.thrust = true;
 								break;
 
 							case GAME.props.keycodes.RIGHT: // right
-								GAME.Ship.turn = 'right';
+								GAME.ship.turn = 'right';
 								break;
 
 							case GAME.props.keycodes.DOWN: // down
@@ -297,31 +331,50 @@ Page Visibility API and Polyfill for vendor prefixes:
 					GAME.props.handlers.onkeyup = function(event) {
 						switch(event.which || event.keyCode) {
 							case GAME.props.keycodes.UP: // up
-								GAME.Ship.thrust = false;
+								GAME.ship.thrust = false;
 								break;
 
 							case GAME.props.keycodes.LEFT: // left
-								GAME.Ship.turn = '';
+								GAME.ship.turn = '';
 								break;
 
 							case GAME.props.keycodes.RIGHT: // right
-								GAME.Ship.turn = '';
+								GAME.ship.turn = '';
 								break;
 
 							default: return; // exit this handler for other keys
 						}
 					}
 
-					GAME.Ship = new classes.Ship({
+					GAME.ship = new classes.Ship({
 						x:GAME.canvas.width/2, 
 						y:GAME.canvas.height/2
 					});
-					GAME.stage.addChild(GAME.Ship);
+					GAME.stage.addChild(GAME.ship);
+
+
+					var numRocks = GAME.level.current + GAME.level.knobs.numRocks;
+					for (var i = 0; i < numRocks; i++) {
+
+						var tempRock = new classes.Rock({
+							x: 10 + ( Math.floor( Math.random() * (GAME.canvas.width - 10) ) ),
+							y: 10 + ( Math.floor( Math.random() * (GAME.canvas.height - 10) ) ),
+							course: Math.floor( Math.random() * 360 ),
+							speed: GAME.level.rockBaseSpeed,
+							size: 'large'
+						});
+						GAME.stage.addChild(tempRock);
+						GAME.rocks.push(tempRock);
+					};
+
 				},
 				frame : function(elapsed){
 					// State function to run on each tick.
 					// move 100 pixels per second (elapsedTimeInMS / 1000msPerSecond * pixelsPerSecond):
-					GAME.Ship.update(elapsed);
+					GAME.ship.update(elapsed);
+					for (var i = 0; i < GAME.rocks.length; i++) {
+						GAME.rocks[i].update(elapsed);
+					};
 
 					for (var i = 0; i < GAME.stage.children.length; i++) {
 						var child = GAME.stage.children[i],
