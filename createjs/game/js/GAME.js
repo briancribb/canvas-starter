@@ -94,6 +94,7 @@ Page Visibility API and Polyfill for vendor prefixes:
 			GAME.state.swap('LOADING', true);
 
 			function handleFileLoad(event) {
+				console.log(event.result.classList = 'center');
 				// Add any images to the page body. Just a temporary thing for testing.
 				if (event.item.type === createjs.LoadQueue.IMAGE) {
 					document.body.appendChild(event.result);
@@ -325,6 +326,31 @@ Page Visibility API and Polyfill for vendor prefixes:
 							case GAME.props.keycodes.DOWN: // down
 								break;
 
+							case GAME.props.keycodes.SPACE: // down
+								console.log('shoot!');
+								if (GAME.missiles.length < 8) {
+									var tempVector = GAME.ship.getVector(
+										GAME.ship.vx,
+										GAME.ship.vy
+									);
+									console.log(' --- ');
+									console.log('tempVector');
+									console.log(tempVector);
+									console.log(' --- ');
+
+									var tempMissile = new classes.Missile({
+										x:		GAME.ship.x, 
+										y:		GAME.ship.y,
+										vx: 	GAME.ship.vx,
+										vy: 	GAME.ship.vy
+										course:	GAME.ship.rotation
+									});
+									GAME.missiles.push(tempMissile);
+									GAME.stage.addChild(tempMissile);
+								}
+								console.log('GAME.missiles.length = ' + GAME.missiles.length);
+								break;
+
 							default: return; // exit this handler for other keys
 						}
 					}
@@ -366,7 +392,6 @@ Page Visibility API and Polyfill for vendor prefixes:
 						GAME.stage.addChild(tempRock);
 						GAME.rocks.push(tempRock);
 					};
-
 				},
 				frame : function(elapsed){
 					// State function to run on each tick.
@@ -374,6 +399,9 @@ Page Visibility API and Polyfill for vendor prefixes:
 					GAME.ship.update(elapsed);
 					for (var i = 0; i < GAME.rocks.length; i++) {
 						GAME.rocks[i].update(elapsed);
+					};
+					for (var i = 0; i < GAME.missiles.length; i++) {
+						GAME.missiles[i].update(elapsed);
 					};
 
 					for (var i = 0; i < GAME.stage.children.length; i++) {

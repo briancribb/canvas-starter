@@ -37,11 +37,10 @@ var classes = classes || {}; // Giving a namespace to the class we're creating. 
 
 	Mover.prototype.explode = function() {
 		return 'explode: this.x = ' + this.x;
-	}
-	Mover.prototype.bestowVector = function(course, speed) {
-		console.log('bestowVector');
+	};
+	Mover.prototype.getVelocity = function(course, speed) {
 		/*
-		Set the vx and vy to a given course and speed. Course is a regular angle from 0-360 degrees, and speed is the 
+		Get the vx and vy for a given course and speed. Course is a regular angle from 0-360 degrees, and speed is the 
 		number of pixels per second the display object should move.
 		*/
 
@@ -53,5 +52,18 @@ var classes = classes || {}; // Giving a namespace to the class we're creating. 
 			vx: speed * cos,
 			vy: speed * sin
 		}
-	}
+	};
+	Mover.prototype.getVector = function(vx, vy) {
+		/*
+		Get a course and speed from x and y velocities. Course is a regular angle from 0-360 degrees, and speed is the 
+		number of pixels per second the display object should move.
+		*/
+		return {
+			course: Math.atan2(vy, vx) * 180 / Math.PI,
+			speed: Math.sqrt ( Math.pow(vx, 2) + Math.pow(vy, 2) )
+		}
+	};
 }());
+
+
+
