@@ -2,7 +2,6 @@ var classes = classes || {}; // Giving a namespace to the class we're creating. 
 
 //http://createjs.com/tutorials/Inheritance/
 (function() {
-
 	/*
 	We're creating a temporary object that lives only during this anonymous setup function. Once it's built up and 
 	ready, we will add it to our classes object to be used by an outside application.
@@ -12,34 +11,37 @@ var classes = classes || {}; // Giving a namespace to the class we're creating. 
 	function Missile(settings) {
 		this.Shape_constructor();
 		// Assign properties from what is passed in.
-		this.x				= settings.x || 0;
-		this.y				= settings.y || 0;
+		this.born			= settings.born;
+		this.age			= settings.age;
+		this.x				= settings.x			|| 0;
+		this.y				= settings.y			|| 0;
 		this.radius			= 2;
-		this.width			= this.radius*2;					// All of our squares will be the same size.
+		this.width			= this.radius*2;
 		this.height			= this.radius*2;
-		this.regX			= this.width/2;							// Setting the registration point so we can rotate around the center of the square.
+		this.regX			= this.width/2;
 		this.regY			= this.height/2;
 
-		this.course			= settings.course		|| -90;					// An angle for the rock to travel at.
-		this.speed			= settings.speed + 100	|| 100;
-		this.vx				= settings.vx || 0;
-		this.vy				= settings.vy || 0;
+		this.course			= settings.course		|| -90;	// An angle for the missile to travel at.
+		this.speed			= 150;
+		this.vx				= settings.vx			|| 0;
+		this.vy				= settings.vy			|| 0;
 
+		/*
+		1.	Get a vector from the missile's default speed and the course that was passed in. The course is the 
+			rotation of the ship when the missile is fired.
+		2.	The vx and vy from the vector are added to the ones that were passed in from the ship which fired this 
+			missile. This way, the missile's speed is added to the ship's current speed.
+		*/
+		var vector = this.getVelocity(this.course, this.speed);
+		this.vx += vector.vx;
+		this.vy += vector.vy;
 
-
-		//var vector = this.getVelocity(this.course, this.speed);
-		//console.log(vector);
-		//this.vx = vector.vx;
-		//this.vy = vector.vy;
 
 		this.setBounds( this.x, this.y, this.width, this.height ); 
 		this.graphics
 			.beginFill("#ffffff")
-				//.drawRect(0,0,20,20)
 				.drawCircle(this.regX,this.regY,this.radius)
 			.endFill(); 
-
-		//console.log('this.sizes.large = ' + this.sizes.large);
 	}
 
 	// extend() builds our temporary object up with the parent as it's prototype. It then returns the new prototype, 
@@ -58,7 +60,6 @@ var classes = classes || {}; // Giving a namespace to the class we're creating. 
 		//console.log('this.vx: ' + this.vx);
 		this.x += (this.vx * elapsed);
 		this.y += (this.vy * elapsed);
-		this.rotation += (this.vr * elapsed);
+		this.age = ( Date.now() ) - this.born;
 	}
-
 }());

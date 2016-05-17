@@ -42,6 +42,7 @@ Page Visibility API and Polyfill for vendor prefixes:
 		rocks : [],
 		saucers : [],
 		missiles : [],
+		missileLife: 3000,
 		particles : [],
 		enemyMissiles : [],
 		level:{
@@ -342,8 +343,9 @@ Page Visibility API and Polyfill for vendor prefixes:
 										x:		GAME.ship.x, 
 										y:		GAME.ship.y,
 										vx: 	GAME.ship.vx,
-										vy: 	GAME.ship.vy
-										course:	GAME.ship.rotation
+										vy: 	GAME.ship.vy,
+										course:	GAME.ship.rotation,
+										born:	GAME.props.now
 									});
 									GAME.missiles.push(tempMissile);
 									GAME.stage.addChild(tempMissile);
@@ -400,8 +402,14 @@ Page Visibility API and Polyfill for vendor prefixes:
 					for (var i = 0; i < GAME.rocks.length; i++) {
 						GAME.rocks[i].update(elapsed);
 					};
+
 					for (var i = 0; i < GAME.missiles.length; i++) {
-						GAME.missiles[i].update(elapsed);
+						if ( GAME.missiles[i].age > GAME.missileLife ) {
+							GAME.stage.removeChild(GAME.missiles[i]);
+							GAME.missiles.splice(i,1);
+						} else {
+							GAME.missiles[i].update(elapsed);
+						}
 					};
 
 					for (var i = 0; i < GAME.stage.children.length; i++) {
