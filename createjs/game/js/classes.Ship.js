@@ -29,7 +29,7 @@ var classes = classes || {}; // Giving a namespace to the class we're creating. 
 		this.thrust			= false;
 		this.turn			= '';
 
-		this.setBounds(  -10, -12, 20, 24 ); 
+		this.setBounds(  this.x-10, this.y-12, this.x+20, this.y+24 ); 
 		//this.graphics.setStrokeStyle(1).beginStroke("rgba(0,0,0,1)").drawCircle(160,60,40);
 		//this.graphics.beginStroke("#FFF").beginFill("#bad").drawRect(0, 0, this.width, this.height);
 		this.graphics = grShip;

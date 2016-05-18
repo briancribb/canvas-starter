@@ -22,7 +22,7 @@ var classes = classes || {}; // Giving a namespace to the class we're creating. 
 		this.regY			= this.height/2;
 
 		this.course			= settings.course		|| -90;	// An angle for the missile to travel at.
-		this.speed			= 150;
+		this.speed			= 200;
 		this.vx				= settings.vx			|| 0;
 		this.vy				= settings.vy			|| 0;
 

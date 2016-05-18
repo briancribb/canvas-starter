@@ -217,6 +217,27 @@ Page Visibility API and Polyfill for vendor prefixes:
 			GAME.props.then = GAME.props.now;
 			return interval;
 		},
+		hitTest: function(object1, object2) {
+			var bounds1		= object1.getBounds(),
+				bounds2		= object2.getBounds();
+
+			var left1		= bounds1.x,
+				left2		= bounds2.x,
+				right1		= bounds1.x + bounds1.width,
+				right2		= bounds2.x + bounds2.width,
+				top1		= bounds1.y,
+				top2		= bounds2.y,
+				bottom1		= bounds1.y + bounds1.height,
+				bottom2		= bounds2.y + bounds2.height;
+
+			if (bottom1 < top2) return(false);
+			if (top1 > bottom2) return(false);
+
+			if (right1 < left2) return(false);
+			if (left1 > right2) return(false);
+
+			return(true);
+		},
 		state: {
 			current				: null,
 			//update			: null,
@@ -381,7 +402,7 @@ Page Visibility API and Polyfill for vendor prefixes:
 					GAME.stage.addChild(GAME.ship);
 
 
-					var numRocks = GAME.level.current + GAME.level.knobs.numRocks;
+					var numRocks = 1;//GAME.level.current + GAME.level.knobs.numRocks;
 					for (var i = 0; i < numRocks; i++) {
 
 						var tempRock = new classes.Rock({
