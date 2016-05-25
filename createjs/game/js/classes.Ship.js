@@ -14,10 +14,10 @@ var classes = classes || {}; // Giving a namespace to the class we're creating. 
 		// Assign properties from what is passed in.
 		this.x				= settings.x || 0;
 		this.y				= settings.y || 0;
-		//this.width		= 30;						// All of our squares will be the same size.
-		//this.height		= 30;
-		//this.regX			= this.width/2;				// Setting the registration point so we can rotate around the center of the square.
-		//this.regY			= this.height/2;
+		this.width			= 24;						// All of our squares will be the same size.
+		this.height			= 20;
+		this.regX			= this.width/2;				// Setting the registration point so we can rotate around the center of the square.
+		this.regY			= this.height/2;
 		this.rotation		= -90;						// This is the default value anyway, but I wanted to set it here for readability.
 		this.cos			= 1;
 		this.sin			= 1;
@@ -29,7 +29,7 @@ var classes = classes || {}; // Giving a namespace to the class we're creating. 
 		this.thrust			= false;
 		this.turn			= '';
 
-		this.setBounds(  this.x-10, this.y-12, this.x+20, this.y+24 ); 
+		this.setBounds(  this.x-10, this.y-12, this.width, this.height ); 
 		//this.graphics.setStrokeStyle(1).beginStroke("rgba(0,0,0,1)").drawCircle(160,60,40);
 		//this.graphics.beginStroke("#FFF").beginFill("#bad").drawRect(0, 0, this.width, this.height);
 		this.graphics = grShip;
@@ -51,38 +51,38 @@ var classes = classes || {}; // Giving a namespace to the class we're creating. 
 	var grShip			=	new createjs.Graphics()
 								.setStrokeStyle(1)
 								.beginFill("#ffffff")
-									.drawCircle(0, 0, 2)
+									.drawCircle(12, 10, 2)
 								.endFill()
 								.beginStroke("#ffffff")
-									.moveTo(12,0)
-										.lineTo(-12,-10)
-										.lineTo(-5,0)
-										.lineTo(-12,10)
-										.lineTo(12,0);
+									.moveTo(24,10)
+										.lineTo(0,0)
+										.lineTo(7,10)
+										.lineTo(0,20)
+										.lineTo(24,10);
 
 
 	var grShipThrust	=	new createjs.Graphics()
 								.setStrokeStyle(1)
 								.beginFill("#ffffff")
-									.drawCircle(0, 0, 2)
+									.drawCircle(12, 10, 2)
 								.endFill()
 								.beginStroke("#ffffff")
-									.moveTo(12,0)
-										.lineTo(-12,-10)
-										.lineTo(-5,0)
-										.lineTo(-12,10)
-										.lineTo(12,0)
+									.moveTo(24,10)
+										.lineTo(0,0)
+										.lineTo(7,10)
+										.lineTo(0,20)
+										.lineTo(24,10)
 
 
 									.setStrokeStyle(3)
-									.moveTo(-10,-3)
-										.lineTo(-10,3)
+									.moveTo(2,7)
+										.lineTo(2,13)
 									.setStrokeStyle(2)
-									.moveTo(-10,0)
-										.lineTo(-16,-0)
+									.moveTo(2,10)
+										.lineTo(-4,10)
 									.setStrokeStyle(1)
-									.moveTo(-16,-0)
-										.lineTo(-20,-0)
+									.moveTo(-4,10)
+										.lineTo(-8,10)
 									.endStroke();
 
 
