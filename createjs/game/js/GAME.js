@@ -217,26 +217,62 @@ Page Visibility API and Polyfill for vendor prefixes:
 			GAME.props.then = GAME.props.now;
 			return interval;
 		},
-		hitTest: function(object1, object2) {
-			var bounds1		= object1.getBounds(),
-				bounds2		= object2.getBounds();
+		utils: {
+			hitTest: function(object1, object2) {
+				var bounds1		= object1.getBounds(),
+					bounds2		= object2.getBounds();
 
-			var left1		= bounds1.x,
-				left2		= bounds2.x,
-				right1		= bounds1.x + bounds1.width,
-				right2		= bounds2.x + bounds2.width,
-				top1		= bounds1.y,
-				top2		= bounds2.y,
-				bottom1		= bounds1.y + bounds1.height,
-				bottom2		= bounds2.y + bounds2.height;
+				var left1		= bounds1.x,
+					left2		= bounds2.x,
+					right1		= bounds1.x + bounds1.width,
+					right2		= bounds2.x + bounds2.width,
+					top1		= bounds1.y,
+					top2		= bounds2.y,
+					bottom1		= bounds1.y + bounds1.height,
+					bottom2		= bounds2.y + bounds2.height;
 
-			if (bottom1 < top2) return(false);
-			if (top1 > bottom2) return(false);
+				if (bottom1 < top2) return(false);
+				if (top1 > bottom2) return(false);
 
-			if (right1 < left2) return(false);
-			if (left1 > right2) return(false);
+				if (right1 < left2) return(false);
+				if (left1 > right2) return(false);
 
-			return(true);
+				return(true);
+			},
+			checkHits: function() {
+				rocks: for (var i = GAME.rocks.length - 1; i >= 0; i--) {
+					console.log(GAME.rocks[i]);
+
+					missiles: for (var j = GAME.missiles.length - 1; j >= 0; j--) {
+						console.log(GAME.missiles[j]);
+					};
+
+
+
+				};
+
+
+			},
+			wrapObjects: function(wrapArray) {
+				for (var i = 0; i < wrapArray.length; i++) {
+					var item = wrapArray[i],
+						bounds = wrapArray[i].getBounds();
+
+					// Wrap vertically
+					if ( item.y < (0 - bounds.height) ) {
+						item.y = GAME.canvas.height + 10;
+					} else if ( item.y > GAME.canvas.height + 10 ) {
+						item.y = 0 - bounds.height;
+					}
+
+					// Wrap horizontally
+					if ( item.x > GAME.canvas.width + bounds.width ) {
+						item.x = -10 - bounds.width;
+					} else if ( item.x < -10 - bounds.width ) {
+						item.x = GAME.canvas.width;
+					}
+				};
+			}
 		},
 		state: {
 			current				: null,
@@ -402,7 +438,7 @@ Page Visibility API and Polyfill for vendor prefixes:
 					GAME.stage.addChild(GAME.ship);
 
 
-					var numRocks = 1;//GAME.level.current + GAME.level.knobs.numRocks;
+					var numRocks = GAME.level.current + GAME.level.knobs.numRocks;
 					for (var i = 0; i < numRocks; i++) {
 
 						var tempRock = new classes.Rock({
@@ -424,6 +460,7 @@ Page Visibility API and Polyfill for vendor prefixes:
 						GAME.rocks[i].update(elapsed);
 					};
 
+
 					for (var i = 0; i < GAME.missiles.length; i++) {
 						if ( GAME.missiles[i].age > GAME.missileLife ) {
 							GAME.stage.removeChild(GAME.missiles[i]);
@@ -432,25 +469,8 @@ Page Visibility API and Polyfill for vendor prefixes:
 							GAME.missiles[i].update(elapsed);
 						}
 					};
+					GAME.utils.wrapObjects(GAME.stage.children);
 
-					for (var i = 0; i < GAME.stage.children.length; i++) {
-						var child = GAME.stage.children[i],
-							bounds = GAME.stage.children[i].getBounds();
-
-						// Wrap vertically
-						if ( child.y < (0 - bounds.height) ) {
-							child.y = GAME.canvas.height + 10;
-						} else if ( child.y > GAME.canvas.height + 10 ) {
-							child.y = 0 - bounds.height;
-						}
-
-						// Wrap horizontally
-						if ( child.x > GAME.canvas.width + bounds.width ) {
-							child.x = -10 - bounds.width;
-						} else if ( child.x < -10 - bounds.width ) {
-							child.x = GAME.canvas.width;
-						}
-					};
 				},
 				cleanup : function(){
 					console.log('NEW_GAME: cleanup()');
