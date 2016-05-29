@@ -42,7 +42,7 @@ Page Visibility API and Polyfill for vendor prefixes:
 		rocks : [],
 		saucers : [],
 		missiles : [],
-		missileLife: 3000,
+		missileLife: 1000,
 		particles : [],
 		enemyMissiles : [],
 		level:{
@@ -53,7 +53,7 @@ Page Visibility API and Polyfill for vendor prefixes:
 			maxMissiles: 6,
 			missileSpeed: 150,
 			knobs: {
-				numRocks: 3,
+				numRocks: 2,
 				rockSpeed:0
 			}
 		},
@@ -137,6 +137,7 @@ Page Visibility API and Polyfill for vendor prefixes:
 					}
 				});
 
+
 				// http://stackoverflow.com/questions/1402698/binding-arrow-keys-in-js-jquery
 				document.onkeydown = function(event) {
 					GAME.props.handlers.onkeydown( event || window.event );
@@ -218,9 +219,26 @@ Page Visibility API and Polyfill for vendor prefixes:
 			return interval;
 		},
 		utils: {
-			hitTest: function(object1, object2) {
-				var bounds1		= object1.getBounds(),
-					bounds2		= object2.getBounds();
+			addRocks: function( numRocks, settings ) {
+				console.log('addRocks: ' + numRocks);
+				var settings = settings || {};
+				for (var i = 0; i < numRocks; i++) {
+
+					var tempRock = new classes.Rock({
+						x:		settings.x		|| 10 + ( Math.floor( Math.random() * (GAME.canvas.width - 10) ) ),
+						y:		settings.y		|| 10 + ( Math.floor( Math.random() * (GAME.canvas.height - 10) ) ),
+						course:	settings.course	|| Math.floor( Math.random() * 360 ),
+						speed:	settings.speed	|| GAME.level.rockBaseSpeed,
+						size:	settings.size	|| 'large'
+					});
+					GAME.stage.addChild(tempRock);
+					GAME.rocks.push(tempRock);
+				};
+			},
+			hitTestBox: function(object1, object2) {
+
+				var bounds1		= object1.getTransformedBounds(),
+					bounds2		= object2.getTransformedBounds();
 
 				var left1		= bounds1.x,
 					left2		= bounds2.x,
@@ -231,6 +249,9 @@ Page Visibility API and Polyfill for vendor prefixes:
 					bottom1		= bounds1.y + bounds1.height,
 					bottom2		= bounds2.y + bounds2.height;
 
+				//console.log('left2 = ' + left2 + ', right2 = ' + right2 + ', top2 = ' + top2 + ', bottom2 = ' + bottom2 );
+
+
 				if (bottom1 < top2) return(false);
 				if (top1 > bottom2) return(false);
 
@@ -239,36 +260,64 @@ Page Visibility API and Polyfill for vendor prefixes:
 
 				return(true);
 			},
+			hitTestDistance: function(object1, object2) {
+				//console.log('hitTestDistance()');
+				var bounds1		= object1.getTransformedBounds(),
+					bounds2		= object2.getTransformedBounds();
+
+				var dx = (bounds2.x + object2.regX) - (bounds1.x + object1.regX),
+					dy = (bounds2.y + object2.regY) - (bounds1.y + object1.regY),
+					dist = Math.sqrt(dx * dx + dy * dy);
+
+					if (dist < 60) {
+						console.log('dist = ' + dist);
+					}
+
+				if ( dist < object1.width/2 + object2.width/2 ) {
+					return true;
+				}
+
+				return false;
+			},
 			checkHits: function() {
 				rocks: for (var i = GAME.rocks.length - 1; i >= 0; i--) {
-					console.log(GAME.rocks[i]);
+					//console.log(GAME.rocks[i]);
 
-					missiles: for (var j = GAME.missiles.length - 1; j >= 0; j--) {
-						console.log(GAME.missiles[j]);
-					};
+					if ( GAME.missiles.length > 0 ) {
+						missiles: for (var j = GAME.missiles.length - 1; j >= 0; j--) {
+							//console.log(GAME.missiles[j].x);
+							if ( GAME.utils.hitTestDistance( GAME.rocks[i], GAME.missiles[j] ) ) {
+								console.log('hit');
 
-
-
+								GAME.stage.removeChild(GAME.rocks[i]);
+								GAME.stage.removeChild(GAME.missiles[j]);
+								GAME.rocks.splice(i, 1);
+								GAME.missiles.splice(j, 1);
+								break rocks;
+								break missiles;
+							}
+							//console.log( GAME .utils.hitTest( GAME.rocks[i], GAME.missiles[j] ) );
+						};
+					}
 				};
 
 
 			},
 			wrapObjects: function(wrapArray) {
 				for (var i = 0; i < wrapArray.length; i++) {
-					var item = wrapArray[i],
-						bounds = wrapArray[i].getBounds();
+					var item = wrapArray[i];
 
 					// Wrap vertically
-					if ( item.y < (0 - bounds.height) ) {
+					if ( item.y < (0 - item.height) ) {
 						item.y = GAME.canvas.height + 10;
 					} else if ( item.y > GAME.canvas.height + 10 ) {
-						item.y = 0 - bounds.height;
+						item.y = 0 - item.height;
 					}
 
 					// Wrap horizontally
-					if ( item.x > GAME.canvas.width + bounds.width ) {
-						item.x = -10 - bounds.width;
-					} else if ( item.x < -10 - bounds.width ) {
+					if ( item.x > GAME.canvas.width + item.width ) {
+						item.x = -10 - item.width;
+					} else if ( item.x < -10 - item.width ) {
 						item.x = GAME.canvas.width;
 					}
 				};
@@ -385,16 +434,16 @@ Page Visibility API and Polyfill for vendor prefixes:
 								break;
 
 							case GAME.props.keycodes.SPACE: // down
-								console.log('shoot!');
+								//console.log('shoot!');
 								if (GAME.missiles.length < 8) {
 									var tempVector = GAME.ship.getVector(
 										GAME.ship.vx,
 										GAME.ship.vy
 									);
-									console.log(' --- ');
-									console.log('tempVector');
-									console.log(tempVector);
-									console.log(' --- ');
+									//console.log(' --- ');
+									//console.log('tempVector');
+									//console.log(tempVector);
+									//console.log(' --- ');
 
 									var tempMissile = new classes.Missile({
 										x:		GAME.ship.x, 
@@ -407,7 +456,7 @@ Page Visibility API and Polyfill for vendor prefixes:
 									GAME.missiles.push(tempMissile);
 									GAME.stage.addChild(tempMissile);
 								}
-								console.log('GAME.missiles.length = ' + GAME.missiles.length);
+								//console.log('GAME.missiles.length = ' + GAME.missiles.length);
 								break;
 
 							default: return; // exit this handler for other keys
@@ -435,22 +484,8 @@ Page Visibility API and Polyfill for vendor prefixes:
 						x:GAME.canvas.width/2, 
 						y:GAME.canvas.height/2
 					});
-					GAME.stage.addChild(GAME.ship);
-
-
-					var numRocks = GAME.level.current + GAME.level.knobs.numRocks;
-					for (var i = 0; i < numRocks; i++) {
-
-						var tempRock = new classes.Rock({
-							x: 10 + ( Math.floor( Math.random() * (GAME.canvas.width - 10) ) ),
-							y: 10 + ( Math.floor( Math.random() * (GAME.canvas.height - 10) ) ),
-							course: Math.floor( Math.random() * 360 ),
-							speed: GAME.level.rockBaseSpeed,
-							size: 'large'
-						});
-						GAME.stage.addChild(tempRock);
-						GAME.rocks.push(tempRock);
-					};
+					GAME.stage.addChild( GAME.ship );
+					GAME.utils.addRocks( GAME.level.current + GAME.level.knobs.numRocks );
 				},
 				frame : function(elapsed){
 					// State function to run on each tick.
@@ -469,6 +504,10 @@ Page Visibility API and Polyfill for vendor prefixes:
 							GAME.missiles[i].update(elapsed);
 						}
 					};
+					GAME.utils.checkHits();
+					//if ( GAME.missiles[0] ) {
+					//	console.log(GAME.missiles[0].x);
+					//}
 					GAME.utils.wrapObjects(GAME.stage.children);
 
 				},

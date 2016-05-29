@@ -29,7 +29,7 @@ var classes = classes || {}; // Giving a namespace to the class we're creating. 
 		this.vx = vector.vx;
 		this.vy = vector.vy;
 
-		this.setBounds( this.x, this.y, this.width, this.height ); 
+		this.setBounds( 0, 0, this.width, this.height ); 
 		this.graphics
 			.setStrokeStyle(1.5)
 				.beginStroke("#ffffff")

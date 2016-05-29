@@ -37,7 +37,7 @@ var classes = classes || {}; // Giving a namespace to the class we're creating. 
 		this.vy += vector.vy;
 
 
-		this.setBounds( this.x, this.y, this.width, this.height ); 
+		this.setBounds( 0, 0, this.width, this.height ); 
 		this.graphics
 			.beginFill("#ffffff")
 				.drawCircle(this.regX,this.regY,this.radius)
