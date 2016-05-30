@@ -39,6 +39,7 @@ Page Visibility API and Polyfill for vendor prefixes:
 		},
 		score:0,
 		ship : {},
+		shipDead : false,
 		rocks : [],
 		saucers : [],
 		missiles : [],
@@ -95,7 +96,7 @@ Page Visibility API and Polyfill for vendor prefixes:
 			GAME.state.swap('LOADING', true);
 
 			function handleFileLoad(event) {
-				console.log(event.result.classList = 'center');
+				//console.log(event.result.classList = 'center');
 				// Add any images to the page body. Just a temporary thing for testing.
 				if (event.item.type === createjs.LoadQueue.IMAGE) {
 					document.body.appendChild(event.result);
@@ -220,7 +221,7 @@ Page Visibility API and Polyfill for vendor prefixes:
 		},
 		utils: {
 			addRocks: function( numRocks, settings ) {
-				console.log('addRocks: ' + numRocks);
+				//console.log('addRocks: ' + numRocks);
 				var settings = settings || {};
 				for (var i = 0; i < numRocks; i++) {
 
@@ -228,7 +229,7 @@ Page Visibility API and Polyfill for vendor prefixes:
 						x:		settings.x		|| 10 + ( Math.floor( Math.random() * (GAME.canvas.width - 10) ) ),
 						y:		settings.y		|| 10 + ( Math.floor( Math.random() * (GAME.canvas.height - 10) ) ),
 						course:	settings.course	|| Math.floor( Math.random() * 360 ),
-						speed:	settings.speed	|| GAME.level.rockBaseSpeed,
+						speed:	settings.speed	|| GAME.level.rockBaseSpeed + GAME.level.knobs.rockSpeed,
 						size:	settings.size	|| 'large'
 					});
 					GAME.stage.addChild(tempRock);
@@ -249,8 +250,6 @@ Page Visibility API and Polyfill for vendor prefixes:
 					bottom1		= bounds1.y + bounds1.height,
 					bottom2		= bounds2.y + bounds2.height;
 
-				//console.log('left2 = ' + left2 + ', right2 = ' + right2 + ', top2 = ' + top2 + ', bottom2 = ' + bottom2 );
-
 
 				if (bottom1 < top2) return(false);
 				if (top1 > bottom2) return(false);
@@ -269,39 +268,58 @@ Page Visibility API and Polyfill for vendor prefixes:
 					dy = (bounds2.y + object2.regY) - (bounds1.y + object1.regY),
 					dist = Math.sqrt(dx * dx + dy * dy);
 
-					if (dist < 60) {
-						console.log('dist = ' + dist);
-					}
-
-				if ( dist < object1.width/2 + object2.width/2 ) {
+				if ( dist < object1.radius + object2.radius ) {
 					return true;
 				}
-
 				return false;
 			},
 			checkHits: function() {
-				rocks: for (var i = GAME.rocks.length - 1; i >= 0; i--) {
-					//console.log(GAME.rocks[i]);
 
+				rocks: for (var i = GAME.rocks.length - 1; i >= 0; i--) {
 					if ( GAME.missiles.length > 0 ) {
+
+						// Check against all missiles
 						missiles: for (var j = GAME.missiles.length - 1; j >= 0; j--) {
-							//console.log(GAME.missiles[j].x);
 							if ( GAME.utils.hitTestDistance( GAME.rocks[i], GAME.missiles[j] ) ) {
-								console.log('hit');
+
+								var settings = null;
+
+								if (GAME.rocks[i].size !== 'small') {
+									settings = {
+										x: GAME.rocks[i].x,
+										y: GAME.rocks[i].y,
+										size : (GAME.rocks[i].size === 'large') ? 'medium' : 'small'
+									}
+
+								}
 
 								GAME.stage.removeChild(GAME.rocks[i]);
 								GAME.stage.removeChild(GAME.missiles[j]);
 								GAME.rocks.splice(i, 1);
 								GAME.missiles.splice(j, 1);
+
+
+								if (settings !== null) {
+									GAME.utils.addRocks( 2, settings );
+								}
+
 								break rocks;
 								break missiles;
 							}
-							//console.log( GAME .utils.hitTest( GAME.rocks[i], GAME.missiles[j] ) );
 						};
+						// Check against the ship
+					}
+
+					if ( GAME.utils.hitTestDistance( GAME.rocks[i], GAME.ship ) ) {
+						console.log('Hit the ship');
+						GAME.stage.removeChild(GAME.rocks[i]);
+						GAME.state.swap('PLAYER_DIE', true);
+
+						GAME.rocks.splice(i, 1);
+						GAME.shipDead = true;
+						break rocks;
 					}
 				};
-
-
 			},
 			wrapObjects: function(wrapArray) {
 				for (var i = 0; i < wrapArray.length; i++) {
@@ -327,7 +345,7 @@ Page Visibility API and Polyfill for vendor prefixes:
 			current				: null,
 			//update			: null,
 			swap : function(newState, init){
-				console.log('swap: ' + newState);
+				//console.log('swap: ' + newState);
 				if (init !== true) {
 					GAME.state.current.cleanup();
 				}
@@ -404,10 +422,60 @@ Page Visibility API and Polyfill for vendor prefixes:
 					GAME.stage.removeChild( GAME.stage.getChildByName('subtitle') );
 				}
 			},
+			// Sets defaults to zero and clears everything out.
 			NEW_GAME : {
 				setup : function(){
 					// Any one-time tasks that happen when we switch to this state.
 					console.log('NEW_GAME: setup()');
+
+					GAME.ship = new classes.Ship({
+						x:GAME.canvas.width/2, 
+						y:GAME.canvas.height/2
+					});
+				},
+				frame : function(elapsed){
+					console.log('NEW_GAME: frame()');
+					GAME.state.swap('NEW_LEVEL');
+				},
+				cleanup : function(){
+					console.log('NEW_GAME: cleanup()');
+				}
+			},
+			// Sets the level knobs and populates the screen with rocks
+			NEW_LEVEL : {
+				setup : function(){
+					// Any one-time tasks that happen when we switch to this state.
+					console.log('NEW_LEVEL: setup()');
+					GAME.utils.addRocks( GAME.level.current + GAME.level.knobs.numRocks );
+				},
+				frame : function(elapsed){
+					console.log('NEW_LEVEL: frame()');
+					GAME.state.swap('PLAYER_START');
+				},
+				cleanup : function(){
+					console.log('NEW_LEVEL: cleanup()');
+				}
+			},
+			// Fades the player ship in from zero to full
+			PLAYER_START : {
+				setup : function(){
+					// Any one-time tasks that happen when we switch to this state.
+					console.log('PLAYER_START: setup()');
+					GAME.stage.addChild( GAME.ship );
+				},
+				frame : function(elapsed){
+					console.log('PLAYER_START: frame()');
+					GAME.state.swap('PLAY_LEVEL');
+				},
+				cleanup : function(){
+					console.log('PLAYER_START: cleanup()');
+				}
+			},
+			// Everything is active and the player can play
+			PLAY_LEVEL : {
+				setup : function(){
+					// Any one-time tasks that happen when we switch to this state.
+					console.log('PLAY_LEVEL: setup()');
 					GAME.props.handlers.onkeydown = function(event) {
 						switch(event.which || event.keyCode) {
 							case GAME.props.keycodes.p: // p
@@ -479,13 +547,6 @@ Page Visibility API and Polyfill for vendor prefixes:
 							default: return; // exit this handler for other keys
 						}
 					}
-
-					GAME.ship = new classes.Ship({
-						x:GAME.canvas.width/2, 
-						y:GAME.canvas.height/2
-					});
-					GAME.stage.addChild( GAME.ship );
-					GAME.utils.addRocks( GAME.level.current + GAME.level.knobs.numRocks );
 				},
 				frame : function(elapsed){
 					// State function to run on each tick.
@@ -509,50 +570,57 @@ Page Visibility API and Polyfill for vendor prefixes:
 					//	console.log(GAME.missiles[0].x);
 					//}
 					GAME.utils.wrapObjects(GAME.stage.children);
-
 				},
 				cleanup : function(){
-					console.log('NEW_GAME: cleanup()');
+					console.log('PLAY_LEVEL: cleanup()');
 				}
 			},
-			NEW_LEVEL : {
-				setup : function(elapsed){
-				},
-				frame : function(elapsed){
-				},
-				cleanup : function(elapsed){
-				}
-			},
-			PLAYER_START : {
-				setup : function(elapsed){
-				},
-				frame : function(elapsed){
-				},
-				cleanup : function(elapsed){
-				}
-			},
-			PLAYER_LEVEL : {
-				setup : function(elapsed){
-				},
-				frame : function(elapsed){
-				},
-				cleanup : function(elapsed){
-				}
-			},
+			// The player ship blows up and returns to PLAYER_START, if the player has ships.
 			PLAYER_DIE : {
-				setup : function(elapsed){
+				setup : function(){
+					// Any one-time tasks that happen when we switch to this state.
+					console.log('PLAYER_DIE: setup()');
 				},
 				frame : function(elapsed){
+					console.log('PLAYER_DIE: frame()');
+					GAME.stage.removeChild(GAME.ship);
+					GAME.state.swap('GAME_OVER');
 				},
-				cleanup : function(elapsed){
+				cleanup : function(){
+					console.log('PLAYER_DIE: cleanup()');
 				}
 			},
+			// The player is out of ships, so display the final score.
 			GAME_OVER : {
-				setup : function(elapsed){
+				setup : function(){
+
+					GAME.props.handlers.onkeydown = function(event) {
+						return;
+					}
+					GAME.props.handlers.onkeyup = function(event) {
+						return;
+					}
+
+					console.log('GAME_OVER: setup()');
+					if (GAME.rocks.length > 0) {
+						for (var i = GAME.rocks.length - 1; i >= 0; i--) {
+							GAME.stage.removeChild(GAME.rocks[i]);
+							GAME.rocks.splice(i, 1);
+						};
+					}
+					if (GAME.missiles.length > 0) {
+						for (var i = GAME.missiles.length - 1; i >= 0; i--) {
+							GAME.stage.removeChild(GAME.missiles[i]);
+							GAME.missiles.splice(i, 1);
+						};
+					}
+					GAME.ship = null;
 				},
 				frame : function(elapsed){
+					console.log('GAME_OVER: frame()');
 				},
-				cleanup : function(elapsed){
+				cleanup : function(){
+					console.log('GAME_OVER: cleanup()');
 				}
 			}
 		}

@@ -14,18 +14,20 @@ var classes = classes || {}; // Giving a namespace to the class we're creating. 
 		// Assign properties from what is passed in.
 		this.x				= settings.x || 0;
 		this.y				= settings.y || 0;
-		this.width			= this.sizes[settings.size] || this.sizes.large;					// All of our squares will be the same size.
-		this.height			= this.sizes[settings.size] || this.sizes.large;
+		this.size			= settings.size || 'large';
+		this.width			= this.sizes[this.size];					// All of our squares will be the same size.
+		this.height			= this.sizes[this.size];
 		this.regX			= this.width/2;							// Setting the registration point so we can rotate around the center of the square.
 		this.regY			= this.height/2;
+		this.radius			= this.width/2;
 		this.rotation		= Math.floor( Math.random() * (360) );
 		this.vr				= settings.vr || 20;
 
 		settings.course		= settings.course || Math.floor( Math.random() * 360 );					// An angle for the rock to travel at.
-		settings.speed		= settings.speed || 100;
+		settings.speed		= settings.speed + this.speedMods[this.size] || 40;
 
 		var vector = this.getVelocity(settings.course, settings.speed);
-		console.log(vector);
+		//console.log(vector);
 		this.vx = vector.vx;
 		this.vy = vector.vy;
 
@@ -56,6 +58,11 @@ var classes = classes || {}; // Giving a namespace to the class we're creating. 
 		large:	55,
 		medium:	30,
 		small:	15
+	}
+	Rock.prototype.speedMods = {
+		large:	0,
+		medium:	20,
+		small:	40
 	}
 
 	Rock.prototype.update = function(elapsed) {

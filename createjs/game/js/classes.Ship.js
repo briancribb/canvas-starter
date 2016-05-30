@@ -18,6 +18,7 @@ var classes = classes || {}; // Giving a namespace to the class we're creating. 
 		this.height			= 20;
 		this.regX			= this.width/2;				// Setting the registration point so we can rotate around the center of the square.
 		this.regY			= this.height/2;
+		this.radius			= 18;
 		this.rotation		= -90;						// This is the default value anyway, but I wanted to set it here for readability.
 		this.cos			= 1;
 		this.sin			= 1;
@@ -29,7 +30,7 @@ var classes = classes || {}; // Giving a namespace to the class we're creating. 
 		this.thrust			= false;
 		this.turn			= '';
 
-		this.setBounds(  this.x-10, this.y-12, this.width, this.height ); 
+		this.setBounds(  0, 0, this.width, this.height ); 
 		//this.graphics.setStrokeStyle(1).beginStroke("rgba(0,0,0,1)").drawCircle(160,60,40);
 		//this.graphics.beginStroke("#FFF").beginFill("#bad").drawRect(0, 0, this.width, this.height);
 		this.graphics = grShip;
