@@ -37,7 +37,14 @@ Page Visibility API and Polyfill for vendor prefixes:
 				{id:"codeschool_logo", src:"img/2014_09_16_20_43_07_Logo-horizontal.png"}
 			],
 		},
-		score:0,
+		score:{
+			total:0,
+			rocks: {
+				large:	10,
+				medium:	20,
+				small:	30
+			}
+		},
 		ship : {},
 		numShips : 3,
 		rocks : [],
@@ -99,6 +106,7 @@ Page Visibility API and Polyfill for vendor prefixes:
 				//console.log(event.result.classList = 'center');
 				// Add any images to the page body. Just a temporary thing for testing.
 				if (event.item.type === createjs.LoadQueue.IMAGE) {
+					event.result.classList = 'centered';
 					document.body.appendChild(event.result);
 				}
 			}
@@ -280,9 +288,11 @@ Page Visibility API and Polyfill for vendor prefixes:
 						// Check against all missiles
 						missiles: for (var j = GAME.missiles.length - 1; j >= 0; j--) {
 							if ( GAME.utils.hitTestDistance( GAME.rocks[i], GAME.missiles[j] ) ) {
+								// Missile hit a rock. Add to score total.
+								GAME.score.total += GAME.score.rocks[GAME.rocks[i].size];
 
+								// Prepare to add more rocks if necessary.
 								var settings = null;
-
 								if (GAME.rocks[i].size !== 'small') {
 									settings = {
 										x: GAME.rocks[i].x,
@@ -384,7 +394,7 @@ Page Visibility API and Polyfill for vendor prefixes:
 
 
 					/* Creating the title screen. */
-					var score = new createjs.Text( 'Score: ' + GAME.score, '14px Arial', '#ffffff' );
+					var score = new createjs.Text( 'Score: ' + GAME.score.total, '14px Arial', '#ffffff' );
 					score.textAlign = "left";
 					score.x = 10;
 					score.y = 10;
