@@ -20,6 +20,7 @@ var classes = classes || {}; // Giving a namespace to the class we're creating. 
 		this.regY			= this.height/2;
 		this.radius			= 18;
 		this.rotation		= -90;						// This is the default value anyway, but I wanted to set it here for readability.
+		this.alpha			= 0;						// This is the default value anyway, but I wanted to set it here for readability.
 		this.cos			= 1;
 		this.sin			= 1;
 		this.vx				= 0;
@@ -29,6 +30,7 @@ var classes = classes || {}; // Giving a namespace to the class we're creating. 
 		this.maxVelocity	= 400;
 		this.thrust			= false;
 		this.turn			= '';
+		this.ready			= false;
 
 		this.setBounds(  0, 0, this.width, this.height ); 
 		//this.graphics.setStrokeStyle(1).beginStroke("rgba(0,0,0,1)").drawCircle(160,60,40);
@@ -87,6 +89,16 @@ var classes = classes || {}; // Giving a namespace to the class we're creating. 
 									.endStroke();
 
 
+
+	Ship.prototype.fadeIn = function(elapsed) {
+		if (this.alpha < 1) {
+			this.alpha += .5 * elapsed;
+		}
+		if (this.alpha >= 1) {
+			this.alpha = 1;
+			this.ready = true;
+		}
+	}
 
 	Ship.prototype.update = function(elapsed) {
 		if (this.thrust === false) {

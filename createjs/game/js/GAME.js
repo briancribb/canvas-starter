@@ -39,7 +39,7 @@ Page Visibility API and Polyfill for vendor prefixes:
 		},
 		score:0,
 		ship : {},
-		shipDead : false,
+		numShips : 3,
 		rocks : [],
 		saucers : [],
 		missiles : [],
@@ -274,7 +274,6 @@ Page Visibility API and Polyfill for vendor prefixes:
 				return false;
 			},
 			checkHits: function() {
-
 				rocks: for (var i = GAME.rocks.length - 1; i >= 0; i--) {
 					if ( GAME.missiles.length > 0 ) {
 
@@ -316,7 +315,6 @@ Page Visibility API and Polyfill for vendor prefixes:
 						GAME.state.swap('PLAYER_DIE', true);
 
 						GAME.rocks.splice(i, 1);
-						GAME.shipDead = true;
 						break rocks;
 					}
 				};
@@ -427,7 +425,7 @@ Page Visibility API and Polyfill for vendor prefixes:
 				setup : function(){
 					// Any one-time tasks that happen when we switch to this state.
 					console.log('NEW_GAME: setup()');
-
+					GAME.numShips = 3;
 					GAME.ship = new classes.Ship({
 						x:GAME.canvas.width/2, 
 						y:GAME.canvas.height/2
@@ -461,11 +459,25 @@ Page Visibility API and Polyfill for vendor prefixes:
 				setup : function(){
 					// Any one-time tasks that happen when we switch to this state.
 					console.log('PLAYER_START: setup()');
+					GAME.ship.x = GAME.canvas.width/2; 
+					GAME.ship.y = GAME.canvas.height/2;
+					GAME.ship.alpha = 0;
+					GAME.ship.ready = false;
 					GAME.stage.addChild( GAME.ship );
 				},
 				frame : function(elapsed){
 					console.log('PLAYER_START: frame()');
-					GAME.state.swap('PLAY_LEVEL');
+
+					GAME.ship.fadeIn(elapsed);
+					for (var i = 0; i < GAME.rocks.length; i++) {
+						GAME.rocks[i].update(elapsed);
+					};
+
+					if (GAME.ship.ready === true) {
+						GAME.state.swap('PLAY_LEVEL');
+					}
+
+
 				},
 				cleanup : function(){
 					console.log('PLAYER_START: cleanup()');
@@ -487,15 +499,21 @@ Page Visibility API and Polyfill for vendor prefixes:
 								break;
 
 							case GAME.props.keycodes.LEFT: // left
-								GAME.ship.turn = 'left';
+								if (GAME.ship.ready) {
+									GAME.ship.turn = 'left';
+								}
 								break;
 
 							case GAME.props.keycodes.UP: // up
-								GAME.ship.thrust = true;
+								if (GAME.ship.ready) {
+									GAME.ship.thrust = true;
+								}
 								break;
 
 							case GAME.props.keycodes.RIGHT: // right
-								GAME.ship.turn = 'right';
+								if (GAME.ship.ready) {
+									GAME.ship.turn = 'right';
+								}
 								break;
 
 							case GAME.props.keycodes.DOWN: // down
@@ -503,7 +521,7 @@ Page Visibility API and Polyfill for vendor prefixes:
 
 							case GAME.props.keycodes.SPACE: // down
 								//console.log('shoot!');
-								if (GAME.missiles.length < 8) {
+								if (GAME.ship.ready === true && GAME.missiles.length < 8) {
 									var tempVector = GAME.ship.getVector(
 										GAME.ship.vx,
 										GAME.ship.vy
@@ -578,13 +596,17 @@ Page Visibility API and Polyfill for vendor prefixes:
 			// The player ship blows up and returns to PLAYER_START, if the player has ships.
 			PLAYER_DIE : {
 				setup : function(){
-					// Any one-time tasks that happen when we switch to this state.
-					console.log('PLAYER_DIE: setup()');
+					GAME.numShips --;
+					console.log('PLAYER_DIE: setup() : ' + GAME.numShips);
+					if (GAME.numShips < 1) {
+						GAME.stage.removeChild(GAME.ship);
+						GAME.state.swap('GAME_OVER');
+					} else {
+						GAME.state.swap('PLAYER_START');
+					}
 				},
 				frame : function(elapsed){
 					console.log('PLAYER_DIE: frame()');
-					GAME.stage.removeChild(GAME.ship);
-					GAME.state.swap('GAME_OVER');
 				},
 				cleanup : function(){
 					console.log('PLAYER_DIE: cleanup()');
@@ -593,6 +615,7 @@ Page Visibility API and Polyfill for vendor prefixes:
 			// The player is out of ships, so display the final score.
 			GAME_OVER : {
 				setup : function(){
+					console.log('GAME_OVER: setup()');
 
 					GAME.props.handlers.onkeydown = function(event) {
 						return;
@@ -601,7 +624,6 @@ Page Visibility API and Polyfill for vendor prefixes:
 						return;
 					}
 
-					console.log('GAME_OVER: setup()');
 					if (GAME.rocks.length > 0) {
 						for (var i = GAME.rocks.length - 1; i >= 0; i--) {
 							GAME.stage.removeChild(GAME.rocks[i]);
