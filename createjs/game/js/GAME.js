@@ -471,7 +471,10 @@ Page Visibility API and Polyfill for vendor prefixes:
 					console.log('PLAYER_START: setup()');
 					GAME.ship.x = GAME.canvas.width/2; 
 					GAME.ship.y = GAME.canvas.height/2;
+					GAME.ship.rotation = -90;
 					GAME.ship.alpha = 0;
+					GAME.ship.vx = 0;
+					GAME.ship.vy = 0;
 					GAME.ship.ready = false;
 					GAME.stage.addChild( GAME.ship );
 				},
