@@ -329,6 +329,25 @@ Page Visibility API and Polyfill for vendor prefixes:
 					}
 				};
 			},
+			resetHandlers: function() {
+				GAME.props.handlers.onkeydown = function() {return;};
+				GAME.props.handlers.onkeyup = function() {return;};
+			},
+			updateRocks: function(elapsed) {
+				for (var i = 0; i < GAME.rocks.length; i++) {
+					GAME.rocks[i].update(elapsed);
+				};
+			},
+			updateMissiles: function(elapsed) {
+				for (var i = 0; i < GAME.missiles.length; i++) {
+					if ( GAME.missiles[i].age > GAME.missileLife ) {
+						GAME.stage.removeChild(GAME.missiles[i]);
+						GAME.missiles.splice(i,1);
+					} else {
+						GAME.missiles[i].update(elapsed);
+					}
+				};
+			},
 			wrapObjects: function(wrapArray) {
 				for (var i = 0; i < wrapArray.length; i++) {
 					var item = wrapArray[i];
@@ -356,6 +375,7 @@ Page Visibility API and Polyfill for vendor prefixes:
 				//console.log('swap: ' + newState);
 				if (init !== true) {
 					GAME.state.current.cleanup();
+					GAME.utils.resetHandlers();
 				}
 				GAME.state.current = GAME.state[newState];
 				GAME.state.current.setup();
@@ -390,8 +410,6 @@ Page Visibility API and Polyfill for vendor prefixes:
 							default: return; // exit this handler for other keys
 						}
 					}
-					GAME.props.handlers.onkeyup = function() {return;};
-
 
 					/* Creating the title screen. */
 					var score = new createjs.Text( 'Score: ' + GAME.score.total, '14px Arial', '#ffffff' );
@@ -482,9 +500,9 @@ Page Visibility API and Polyfill for vendor prefixes:
 					console.log('PLAYER_START: frame()');
 
 					GAME.ship.fadeIn(elapsed);
-					for (var i = 0; i < GAME.rocks.length; i++) {
-						GAME.rocks[i].update(elapsed);
-					};
+
+					GAME.utils.updateRocks(elapsed);
+					GAME.utils.updateMissiles(elapsed);
 
 					if (GAME.ship.ready === true) {
 						GAME.state.swap('PLAY_LEVEL');
@@ -583,19 +601,10 @@ Page Visibility API and Polyfill for vendor prefixes:
 					// State function to run on each tick.
 					// move 100 pixels per second (elapsedTimeInMS / 1000msPerSecond * pixelsPerSecond):
 					GAME.ship.update(elapsed);
-					for (var i = 0; i < GAME.rocks.length; i++) {
-						GAME.rocks[i].update(elapsed);
-					};
 
+					GAME.utils.updateRocks(elapsed);
+					GAME.utils.updateMissiles(elapsed);
 
-					for (var i = 0; i < GAME.missiles.length; i++) {
-						if ( GAME.missiles[i].age > GAME.missileLife ) {
-							GAME.stage.removeChild(GAME.missiles[i]);
-							GAME.missiles.splice(i,1);
-						} else {
-							GAME.missiles[i].update(elapsed);
-						}
-					};
 					GAME.utils.checkHits();
 					//if ( GAME.missiles[0] ) {
 					//	console.log(GAME.missiles[0].x);
