@@ -37,13 +37,16 @@ Page Visibility API and Polyfill for vendor prefixes:
 				{id:"codeschool_logo", src:"img/2014_09_16_20_43_07_Logo-horizontal.png"}
 			],
 		},
-		score:{
-			total:0,
-			rocks: {
-				large:	10,
-				medium:	20,
-				small:	30
-			}
+		score: {
+			total:	0,
+			small:	10,
+			medium:	20,
+			large:	30
+		},
+		displayText :  {
+			fps: {},
+			score: {},
+			ships: {}
 		},
 		ship : {},
 		numShips : 3,
@@ -106,7 +109,6 @@ Page Visibility API and Polyfill for vendor prefixes:
 				//console.log(event.result.classList = 'center');
 				// Add any images to the page body. Just a temporary thing for testing.
 				if (event.item.type === createjs.LoadQueue.IMAGE) {
-					event.result.classList = 'centered';
 					document.body.appendChild(event.result);
 				}
 			}
@@ -196,12 +198,30 @@ Page Visibility API and Polyfill for vendor prefixes:
 			createObjects: function() {
 				/* Make all the stuff that will always remain on the stage. */
 				console.log('createObjects()');
-				GAME.props.fpsText = new createjs.Text("Hello World", "14px Arial", GAME.props.textColor);
-				GAME.props.fpsText.textAlign = "right";
-				GAME.props.fpsText.x = GAME.canvas.width - 10;
-				GAME.props.fpsText.y = 10;
-				GAME.props.fpsText.name = 'fpsText';
-				GAME.stage.addChild(GAME.props.fpsText);
+				GAME.displayText.fps = new createjs.Text("Hello World", "14px Arial", GAME.props.textColor);
+				GAME.displayText.fps.textAlign = "right";
+				GAME.displayText.fps.x = GAME.canvas.width - 10;
+				GAME.displayText.fps.y = 10;
+				GAME.displayText.fps.name = 'fpsText';
+				GAME.stage.addChild(GAME.displayText.fps);
+
+				/*
+				var score = new createjs.Text( 'Score: ' + GAME.score.total, '14px Arial', '#ffffff' );
+				score.textAlign = "left";
+				score.x = 10;
+				score.y = 10;
+				score.name = 'score';
+				GAME.stage.addChild(score);
+
+				var numShips = new createjs.Text( 'Ships: ' + GAME.numShips, '14px Arial', '#ffffff' );
+				numShips.textAlign = "center";
+				numShips.x = GAME.canvas.width/2;
+				numShips.y = 10;
+				numShips.name = 'numShips';
+				GAME.stage.addChild(numShips);
+				*/
+
+
 			}
 		},
 		tick: function(event) {
@@ -228,6 +248,26 @@ Page Visibility API and Polyfill for vendor prefixes:
 			return interval;
 		},
 		utils: {
+			updateRocks: function( elapsed ) {
+				for (var i = 0; i < GAME.rocks.length; i++) {
+					GAME.rocks[i].update(elapsed);
+				};
+			},
+			updateMissiles: function( elapsed ) {
+				for (var i = 0; i < GAME.missiles.length; i++) {
+					if ( GAME.missiles[i].age > GAME.missileLife ) {
+						GAME.stage.removeChild(GAME.missiles[i]);
+						GAME.missiles.splice(i,1);
+					} else {
+						GAME.missiles[i].update(elapsed);
+					}
+				};
+			},
+			updateText: function( elapsed ) {
+				if (createjs.Ticker.getTicks() % 20 == 0) {
+					GAME.displayText.fps.text = GAME.getFPS(elapsed);
+				}
+			},
 			addRocks: function( numRocks, settings ) {
 				//console.log('addRocks: ' + numRocks);
 				var settings = settings || {};
@@ -288,11 +328,9 @@ Page Visibility API and Polyfill for vendor prefixes:
 						// Check against all missiles
 						missiles: for (var j = GAME.missiles.length - 1; j >= 0; j--) {
 							if ( GAME.utils.hitTestDistance( GAME.rocks[i], GAME.missiles[j] ) ) {
-								// Missile hit a rock. Add to score total.
-								GAME.score.total += GAME.score.rocks[GAME.rocks[i].size];
 
-								// Prepare to add more rocks if necessary.
 								var settings = null;
+
 								if (GAME.rocks[i].size !== 'small') {
 									settings = {
 										x: GAME.rocks[i].x,
@@ -329,25 +367,6 @@ Page Visibility API and Polyfill for vendor prefixes:
 					}
 				};
 			},
-			resetHandlers: function() {
-				GAME.props.handlers.onkeydown = function() {return;};
-				GAME.props.handlers.onkeyup = function() {return;};
-			},
-			updateRocks: function(elapsed) {
-				for (var i = 0; i < GAME.rocks.length; i++) {
-					GAME.rocks[i].update(elapsed);
-				};
-			},
-			updateMissiles: function(elapsed) {
-				for (var i = 0; i < GAME.missiles.length; i++) {
-					if ( GAME.missiles[i].age > GAME.missileLife ) {
-						GAME.stage.removeChild(GAME.missiles[i]);
-						GAME.missiles.splice(i,1);
-					} else {
-						GAME.missiles[i].update(elapsed);
-					}
-				};
-			},
 			wrapObjects: function(wrapArray) {
 				for (var i = 0; i < wrapArray.length; i++) {
 					var item = wrapArray[i];
@@ -375,7 +394,6 @@ Page Visibility API and Polyfill for vendor prefixes:
 				//console.log('swap: ' + newState);
 				if (init !== true) {
 					GAME.state.current.cleanup();
-					GAME.utils.resetHandlers();
 				}
 				GAME.state.current = GAME.state[newState];
 				GAME.state.current.setup();
@@ -410,23 +428,15 @@ Page Visibility API and Polyfill for vendor prefixes:
 							default: return; // exit this handler for other keys
 						}
 					}
+					GAME.props.handlers.onkeyup = function() {return;};
 
 					/* Creating the title screen. */
-					var score = new createjs.Text( 'Score: ' + GAME.score.total, '14px Arial', '#ffffff' );
-					score.textAlign = "left";
-					score.x = 10;
-					score.y = 10;
-					score.name = 'score';
-					GAME.stage.addChild(score);
-
-
 					var title = new createjs.Text( 'Asteroids Example Type Game', '18px Arial', '#ffffff' );
 					title.textAlign = "center";
 					title.x = GAME.canvas.width/2;
 					title.y = GAME.canvas.height/2 - 20;
 					title.name = 'title';
 					GAME.stage.addChild(title);
-
 
 					var subtitle = new createjs.Text( 'Press spacebar to continue...', '12px Arial', '#ffffff' );
 					subtitle.textAlign = "center";
@@ -437,9 +447,7 @@ Page Visibility API and Polyfill for vendor prefixes:
 				},
 				frame : function(elapsed){
 					// State function to run on each tick.
-					if (createjs.Ticker.getTicks() % 20 == 0) {
-						GAME.props.fpsText.text = GAME.getFPS(elapsed);
-					}
+					GAME.utils.updateText(elapsed);
 				},
 				cleanup : function(elapsed){
 					console.log('TITLE: cleanup()');
@@ -489,8 +497,8 @@ Page Visibility API and Polyfill for vendor prefixes:
 					console.log('PLAYER_START: setup()');
 					GAME.ship.x = GAME.canvas.width/2; 
 					GAME.ship.y = GAME.canvas.height/2;
-					GAME.ship.rotation = -90;
 					GAME.ship.alpha = 0;
+					GAME.ship.rotation = -90;
 					GAME.ship.vx = 0;
 					GAME.ship.vy = 0;
 					GAME.ship.ready = false;
@@ -500,9 +508,9 @@ Page Visibility API and Polyfill for vendor prefixes:
 					console.log('PLAYER_START: frame()');
 
 					GAME.ship.fadeIn(elapsed);
-
-					GAME.utils.updateRocks(elapsed);
 					GAME.utils.updateMissiles(elapsed);
+					GAME.utils.updateRocks(elapsed);
+					GAME.utils.checkHits();
 
 					if (GAME.ship.ready === true) {
 						GAME.state.swap('PLAY_LEVEL');
@@ -598,13 +606,12 @@ Page Visibility API and Polyfill for vendor prefixes:
 					}
 				},
 				frame : function(elapsed){
-					// State function to run on each tick.
+					GAME.displayText.fps.text = GAME.getFPS(elapsed);
+
 					// move 100 pixels per second (elapsedTimeInMS / 1000msPerSecond * pixelsPerSecond):
 					GAME.ship.update(elapsed);
-
-					GAME.utils.updateRocks(elapsed);
 					GAME.utils.updateMissiles(elapsed);
-
+					GAME.utils.updateRocks(elapsed);
 					GAME.utils.checkHits();
 					//if ( GAME.missiles[0] ) {
 					//	console.log(GAME.missiles[0].x);
