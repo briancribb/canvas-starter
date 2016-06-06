@@ -109,6 +109,8 @@ Page Visibility API and Polyfill for vendor prefixes:
 				//console.log(event.result.classList = 'center');
 				// Add any images to the page body. Just a temporary thing for testing.
 				if (event.item.type === createjs.LoadQueue.IMAGE) {
+					//event.result.classList = 'center';
+					event.result.classList = 'centered';
 					document.body.appendChild(event.result);
 				}
 			}
@@ -182,10 +184,6 @@ Page Visibility API and Polyfill for vendor prefixes:
 				*/
 				createjs.Ticker.timingMode = createjs.Ticker.RAF;
 			},
-			resetListeners: function() {
-				GAME.props.handlers.onkeydown = function(){return;};
-				GAME.props.handlers.onkeyup = function(){return;};
-			},
 			createloadGraphic: function() {
 				console.log('createloadGraphic()');
 				/* Some small animation that does not require external assets. This will play until the all of assets in the manifest are loaded. */
@@ -198,29 +196,26 @@ Page Visibility API and Polyfill for vendor prefixes:
 			createObjects: function() {
 				/* Make all the stuff that will always remain on the stage. */
 				console.log('createObjects()');
-				GAME.displayText.fps = new createjs.Text("Hello World", "14px Arial", GAME.props.textColor);
+				GAME.displayText.fps = new createjs.Text("FPS", "14px Arial", GAME.props.textColor);
 				GAME.displayText.fps.textAlign = "right";
 				GAME.displayText.fps.x = GAME.canvas.width - 10;
 				GAME.displayText.fps.y = 10;
-				GAME.displayText.fps.name = 'fpsText';
+				GAME.displayText.fps.name = 'txtFPS';
 				GAME.stage.addChild(GAME.displayText.fps);
 
-				/*
-				var score = new createjs.Text( 'Score: ' + GAME.score.total, '14px Arial', '#ffffff' );
-				score.textAlign = "left";
-				score.x = 10;
-				score.y = 10;
-				score.name = 'score';
-				GAME.stage.addChild(score);
+				GAME.displayText.score = new createjs.Text( 'Score: ' + GAME.score.total, '14px Arial', GAME.props.textColor );
+				GAME.displayText.score.textAlign = "left";
+				GAME.displayText.score.x = 10;
+				GAME.displayText.score.y = 10;
+				GAME.displayText.score.name = 'txtScore';
+				GAME.stage.addChild(GAME.displayText.score);
 
-				var numShips = new createjs.Text( 'Ships: ' + GAME.numShips, '14px Arial', '#ffffff' );
-				numShips.textAlign = "center";
-				numShips.x = GAME.canvas.width/2;
-				numShips.y = 10;
-				numShips.name = 'numShips';
-				GAME.stage.addChild(numShips);
-				*/
-
+				GAME.displayText.ships = new createjs.Text( 'Ships: ' + GAME.numShips, '14px Arial', GAME.props.textColor );
+				GAME.displayText.ships.textAlign = "center";
+				GAME.displayText.ships.x = GAME.canvas.width/2;
+				GAME.displayText.ships.y = 10;
+				GAME.displayText.ships.name = 'txtShips';
+				GAME.stage.addChild(GAME.displayText.ships);
 
 			}
 		},
@@ -248,6 +243,10 @@ Page Visibility API and Polyfill for vendor prefixes:
 			return interval;
 		},
 		utils: {
+			resetListeners: function() {
+				GAME.props.handlers.onkeydown = function(){return;};
+				GAME.props.handlers.onkeyup = function(){return;};
+			},
 			updateRocks: function( elapsed ) {
 				for (var i = 0; i < GAME.rocks.length; i++) {
 					GAME.rocks[i].update(elapsed);
@@ -267,6 +266,8 @@ Page Visibility API and Polyfill for vendor prefixes:
 				if (createjs.Ticker.getTicks() % 20 == 0) {
 					GAME.displayText.fps.text = GAME.getFPS(elapsed);
 				}
+				GAME.displayText.score.text = 'Score: ' + GAME.score.total;
+				GAME.displayText.ships.text = 'Ships: ' + GAME.numShips;
 			},
 			addRocks: function( numRocks, settings ) {
 				//console.log('addRocks: ' + numRocks);
@@ -323,30 +324,27 @@ Page Visibility API and Polyfill for vendor prefixes:
 			},
 			checkHits: function() {
 				rocks: for (var i = GAME.rocks.length - 1; i >= 0; i--) {
+
+					var settings = null;
+
 					if ( GAME.missiles.length > 0 ) {
 
 						// Check against all missiles
 						missiles: for (var j = GAME.missiles.length - 1; j >= 0; j--) {
 							if ( GAME.utils.hitTestDistance( GAME.rocks[i], GAME.missiles[j] ) ) {
 
-								var settings = null;
+								// Capture settings of the rock.
+								settings = breakRockSettings( GAME.rocks[i] );
 
-								if (GAME.rocks[i].size !== 'small') {
-									settings = {
-										x: GAME.rocks[i].x,
-										y: GAME.rocks[i].y,
-										size : (GAME.rocks[i].size === 'large') ? 'medium' : 'small'
-									}
-
-								}
-
+								// Remove the rock before adding any others.
+								GAME.score.total += GAME.score[GAME.rocks[i].size];
 								GAME.stage.removeChild(GAME.rocks[i]);
 								GAME.stage.removeChild(GAME.missiles[j]);
 								GAME.rocks.splice(i, 1);
 								GAME.missiles.splice(j, 1);
 
-
-								if (settings !== null) {
+								// If we have rock settings, add two more.
+								if (settings) {
 									GAME.utils.addRocks( 2, settings );
 								}
 
@@ -354,16 +352,38 @@ Page Visibility API and Polyfill for vendor prefixes:
 								break missiles;
 							}
 						};
-						// Check against the ship
 					}
 
+					// Check the current rock against the ship
 					if ( GAME.utils.hitTestDistance( GAME.rocks[i], GAME.ship ) ) {
-						console.log('Hit the ship');
+
+						// Capture settings of the rock.
+						settings = breakRockSettings( GAME.rocks[i] );
+
 						GAME.stage.removeChild(GAME.rocks[i]);
+						GAME.rocks.splice(i, 1);
+						if (settings) {
+							GAME.utils.addRocks( 2, settings );
+						}
+
 						GAME.state.swap('PLAYER_DIE', true);
 
-						GAME.rocks.splice(i, 1);
 						break rocks;
+					}
+
+
+
+
+					function breakRockSettings(rock) {
+						var settings = null;
+						if (rock.size !== 'small') {
+							settings = {
+								x: rock.x,
+								y: rock.y,
+								size : (rock.size === 'large') ? 'medium' : 'small'
+							}
+						}
+						return settings;
 					}
 				};
 			},
@@ -393,6 +413,7 @@ Page Visibility API and Polyfill for vendor prefixes:
 			swap : function(newState, init){
 				//console.log('swap: ' + newState);
 				if (init !== true) {
+					GAME.utils.resetListeners();
 					GAME.state.current.cleanup();
 				}
 				GAME.state.current = GAME.state[newState];
@@ -462,13 +483,14 @@ Page Visibility API and Polyfill for vendor prefixes:
 					// Any one-time tasks that happen when we switch to this state.
 					console.log('NEW_GAME: setup()');
 					GAME.numShips = 3;
+					GAME.ship = null;
 					GAME.ship = new classes.Ship({
 						x:GAME.canvas.width/2, 
 						y:GAME.canvas.height/2
 					});
 				},
 				frame : function(elapsed){
-					console.log('NEW_GAME: frame()');
+					//console.log('NEW_GAME: frame()');
 					GAME.state.swap('NEW_LEVEL');
 				},
 				cleanup : function(){
@@ -483,7 +505,7 @@ Page Visibility API and Polyfill for vendor prefixes:
 					GAME.utils.addRocks( GAME.level.current + GAME.level.knobs.numRocks );
 				},
 				frame : function(elapsed){
-					console.log('NEW_LEVEL: frame()');
+					//console.log('NEW_LEVEL: frame()');
 					GAME.state.swap('PLAYER_START');
 				},
 				cleanup : function(){
@@ -495,17 +517,10 @@ Page Visibility API and Polyfill for vendor prefixes:
 				setup : function(){
 					// Any one-time tasks that happen when we switch to this state.
 					console.log('PLAYER_START: setup()');
-					GAME.ship.x = GAME.canvas.width/2; 
-					GAME.ship.y = GAME.canvas.height/2;
-					GAME.ship.alpha = 0;
-					GAME.ship.rotation = -90;
-					GAME.ship.vx = 0;
-					GAME.ship.vy = 0;
-					GAME.ship.ready = false;
 					GAME.stage.addChild( GAME.ship );
 				},
 				frame : function(elapsed){
-					console.log('PLAYER_START: frame()');
+					//console.log('PLAYER_START: frame()');
 
 					GAME.ship.fadeIn(elapsed);
 					GAME.utils.updateMissiles(elapsed);
@@ -606,17 +621,20 @@ Page Visibility API and Polyfill for vendor prefixes:
 					}
 				},
 				frame : function(elapsed){
-					GAME.displayText.fps.text = GAME.getFPS(elapsed);
+					//GAME.displayText.fps.text = GAME.getFPS(elapsed);
 
 					// move 100 pixels per second (elapsedTimeInMS / 1000msPerSecond * pixelsPerSecond):
 					GAME.ship.update(elapsed);
 					GAME.utils.updateMissiles(elapsed);
 					GAME.utils.updateRocks(elapsed);
-					GAME.utils.checkHits();
-					//if ( GAME.missiles[0] ) {
-					//	console.log(GAME.missiles[0].x);
-					//}
 					GAME.utils.wrapObjects(GAME.stage.children);
+					GAME.utils.checkHits();
+
+					GAME.utils.updateText();
+
+					if ( GAME.rocks.length === 0 && GAME.ship.ready === true ) {
+						GAME.state.swap('NEW_LEVEL');
+					}
 				},
 				cleanup : function(){
 					console.log('PLAY_LEVEL: cleanup()');
@@ -636,22 +654,17 @@ Page Visibility API and Polyfill for vendor prefixes:
 				},
 				frame : function(elapsed){
 					console.log('PLAYER_DIE: frame()');
+					GAME.utils.updateText();
 				},
 				cleanup : function(){
 					console.log('PLAYER_DIE: cleanup()');
+					GAME.ship.reset();
 				}
 			},
 			// The player is out of ships, so display the final score.
 			GAME_OVER : {
 				setup : function(){
 					console.log('GAME_OVER: setup()');
-
-					GAME.props.handlers.onkeydown = function(event) {
-						return;
-					}
-					GAME.props.handlers.onkeyup = function(event) {
-						return;
-					}
 
 					if (GAME.rocks.length > 0) {
 						for (var i = GAME.rocks.length - 1; i >= 0; i--) {
@@ -665,10 +678,10 @@ Page Visibility API and Polyfill for vendor prefixes:
 							GAME.missiles.splice(i, 1);
 						};
 					}
-					GAME.ship = null;
 				},
 				frame : function(elapsed){
-					console.log('GAME_OVER: frame()');
+					//console.log('GAME_OVER: frame()');
+					GAME.utils.updateText();
 				},
 				cleanup : function(){
 					console.log('GAME_OVER: cleanup()');

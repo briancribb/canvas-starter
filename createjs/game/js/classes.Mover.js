@@ -35,9 +35,6 @@ var classes = classes || {}; // Giving a namespace to the class we're creating. 
 	*/
 	classes.Mover = createjs.promote(Mover, "Shape");
 
-	Mover.prototype.explode = function() {
-		return 'explode: this.x = ' + this.x;
-	};
 	Mover.prototype.getVelocity = function(course, speed) {
 		/*
 		Get the vx and vy for a given course and speed. Course is a regular angle from 0-360 degrees, and speed is the 

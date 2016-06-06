@@ -26,7 +26,7 @@ var classes = classes || {}; // Giving a namespace to the class we're creating. 
 		this.vx				= 0;
 		this.vy				= 0;
 		this.vr				= settings.vx || 130;
-		this.accel			= 5;
+		this.accel			= 3;
 		this.maxVelocity	= 400;
 		this.thrust			= false;
 		this.turn			= '';
@@ -92,12 +92,24 @@ var classes = classes || {}; // Giving a namespace to the class we're creating. 
 
 	Ship.prototype.fadeIn = function(elapsed) {
 		if (this.alpha < 1) {
-			this.alpha += .5 * elapsed;
+			this.alpha += .7 * elapsed;
 		}
 		if (this.alpha >= 1) {
 			this.alpha = 1;
 			this.ready = true;
 		}
+	}
+
+	Ship.prototype.reset = function() {
+		this.x = GAME.canvas.width/2; 
+		this.y = GAME.canvas.height/2;
+		this.alpha = 0;
+		this.rotation = -90;
+		this.vx = 0;
+		this.vy = 0;
+		this.thrust = false;
+		this.ready = false;
+		this.turn = '';
 	}
 
 	Ship.prototype.update = function(elapsed) {
