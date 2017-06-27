@@ -3,17 +3,27 @@
 	<head>
 		<title>CreateJS Starter Template</title>
 		<style>
-			canvas {
+			canvas, .color-picker-wrap {
 				display:block;
 				margin: 0 auto;
-				background:#183794;
+			}
+			canvas {
+				background:#BADA55;
+				max-width: 100%;
+				height:auto;
+			}
+			.color-picker-wrap {
+				text-align: center;
+				margin: 20px 0 10px;
 			}
 		</style>
 	</head>
 	<body>
+		<div class="color-picker-wrap">Color: <input id="color-picker" class="jscolor" value="ab2567"></div>
 		<div id="canvasContainer"></div>
+		<script src="../../vendor/jscolor-2.0.4/jscolor.min.js"></script>
 		<script src="js/createjs-2015.05.21.min.js"></script>
-		<script src="js/classes.Snowflake.js"></script>
+		<script src="js/classes.GrayPic.js"></script>
 		<script src="js/APP.js"></script>
 	</body>
 </html>

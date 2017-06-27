@@ -19,8 +19,8 @@ var APP = {
 		now:null,				// "now" and "then" get initial values in APP.setup.addListeners().
 		then:null,
 		interval:0,
-		width:600,				// Width of our canvas app. Used when creating the canvas and testing its bounds.
-		height:300,				// Height of our canvas app.
+		width:946,				// Width of our canvas app. Used when creating the canvas and testing its bounds.
+		height:710,				// Height of our canvas app.
 		textColor: '#FFFD8A',
 		keycodes: {
 			SPACE: 32,
@@ -79,14 +79,23 @@ var APP = {
 
 		function handleFileLoad(event) {
 			console.log('handleFileLoad()');
+			console.log(event);
 
+			for (var i = 0; i < APP.props.assets.length; i++) {
+				if ( APP.props.assets[i].id === event.item.id) {
+					APP.props.assets[i].width = event.result.width;
+					APP.props.assets[i].height = event.result.height;
+				}
+				
+			};
 			// Add any images to the page body. Just a temporary thing for testing.
-			if (event.item.type === createjs.LoadQueue.IMAGE) {
-				document.body.appendChild(event.result);
-			}
+			//if (event.item.type === createjs.LoadQueue.IMAGE) {
+			//	document.body.appendChild(event.result);
+			//}
 		}
 		function handleComplete(event) {
 			console.log('handleComplete()');
+			console.log(event);
 			/* Once assets are loaded, run the rest of the app. */
 			APP.setup.createObjects();
 			APP.play();
@@ -120,6 +129,12 @@ var APP = {
 					APP.document_hidden = document[APP.hidden];
 					console.log('visibilityChange(): APP.document_hidden = ' + APP.document_hidden);
 				}
+			});
+
+
+			// COLOR PICKER CODE
+			document.getElementById('color-picker').addEventListener('change', function(event) {
+				console.log('Changed. Color is: ' + event.target.value + ', rgb: ' + APP.hexToRgb(event.target.value) );
 			});
 
 			// http://stackoverflow.com/questions/1402698/binding-arrow-keys-in-js-jquery
@@ -199,23 +214,16 @@ var APP = {
 			APP.stage.addChild(APP.props.fpsText);
 			*/
 
-			var numFlakes = (APP.canvas.width/50 * 2) * (APP.canvas.height/50 * 2);
-
-			for (i = 0; i < numFlakes; i++) {
-				// Randomly placed, but no less than 10 pixels from each side.
-				var tempX = 10 + ( Math.floor( Math.random() * (APP.canvas.width - 10) ) ),
-					tempY = 10 + ( Math.floor( Math.random() * (APP.canvas.height - 10) ) ),
-					tempRadius = 2 + ( Math.floor( Math.random() * 4 ) ),
-					tempResistance = (100 - (Math.floor(Math.random() * 50))) / 100; // Random 5 to 15, from 100, then turned into decimal. Ex .85
-
-				var tempSpeed = (tempRadius - 2) * 10;
-				
-				// New Snowflake instance.
-				//var tempSnowflake = new APP.snowflake( { context:APP.context, x:tempX, y:tempY, radius:tempRadius, resistance:tempResistance, speed:tempSpeed } );
-				var tempSnowflake = new classes.Snowflake( { canvas:APP.canvas, id:i, x:tempX, y:tempY, radius:tempRadius, resistance:tempResistance, speed:tempSpeed } );
-				APP.props.snowflakes.push(tempSnowflake);
-				APP.stage.addChild(tempSnowflake);
-			}
+			var bigPic = new classes.GrayPic( {
+				canvas:APP.canvas, 
+				id:APP.props.assets[2].id, 
+				x:0, 
+				y:0, 
+				width:APP.props.assets[2].width,
+				height:APP.props.assets[2].height,
+				src:APP.props.assets[2].src
+			} );
+			APP.stage.addChild(bigPic);
 		}
 	},
 	tick: function(event) {
@@ -258,39 +266,16 @@ var APP = {
 		}
 	},
 	updateObjects : function(elapsed) {
-		var snowflakesArray = APP.props.snowflakes;
-		//APP.props.fpsText.text = APP.getFPS(elapsed);
-		// move 100 pixels per second (elapsedTimeInMS / 1000msPerSecond * pixelsPerSecond):
-		//if (createjs.Ticker.getTicks() % 20 == 0) {
-			//console.log('updateObjects() ticks = ' + createjs.Ticker.getTicks());
-		//	APP.updateCornerText();
-		//}
+		//console.log('updateObjects()');
+		//APP.stage.children[0].x ++;
+	},
+	hexToRgb : function(hex) {
+		var bigint = parseInt(hex, 16);
+		var r = (bigint >> 16) & 255;
+		var g = (bigint >> 8) & 255;
+		var b = bigint & 255;
 
-		for(var i=0; i<snowflakesArray.length; i++) {
-			//APP.snowflakes[i].updatePosition(elapsed);
-
-			// vx means "horizontal velocity" and vr means "rotational velocity". Adding them to the x and rotation properties.
-
-
-			snowflakesArray[i].x += ((APP.props.wind + snowflakesArray[i].speed) * snowflakesArray[i].resistance) * (elapsed);
-			snowflakesArray[i].y += ((APP.props.gravity + snowflakesArray[i].speed) * snowflakesArray[i].resistance) * (elapsed);
-
-
-			// Preparing velocities for the next frame.
-			//=========================================
-			// wrapping from the left wall.
-			if ( (snowflakesArray[i].x + snowflakesArray[i].radius) < 0 ) {
-				snowflakesArray[i].x = APP.canvas.width + snowflakesArray[i].radius;
-			}
-			// wrapping from the right wall.
-			if ( (snowflakesArray[i].x - snowflakesArray[i].radius) > APP.canvas.width ) {
-				snowflakesArray[i].x = 0 - snowflakesArray[i].radius;
-			}
-			// wrapping from the floor.
-			if ( (snowflakesArray[i].y + snowflakesArray[i].radius) > APP.canvas.height+10) {
-				snowflakesArray[i].y = -10 - snowflakesArray[i].radius;
-			}
-		}
+		return r + "," + g + "," + b;
 	}
 };
 
