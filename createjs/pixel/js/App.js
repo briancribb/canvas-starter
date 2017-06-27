@@ -72,10 +72,10 @@ var APP = {
 
 
 		/* Load assets. The handler functions for the queue live in init() rather than the addListeners function because they won't need to exist after init() has run. */
-		var queue = new createjs.LoadQueue(true);
-		queue.loadManifest(APP.props.assets);
-		queue.on("fileload", handleFileLoad, this);
-		queue.on("complete", handleComplete, this);
+		APP.queue = new createjs.LoadQueue(true);
+		APP.queue.loadManifest(APP.props.assets);
+		APP.queue.on("fileload", handleFileLoad, this);
+		APP.queue.on("complete", handleComplete, this);
 
 		function handleFileLoad(event) {
 			console.log('handleFileLoad()');
@@ -108,12 +108,20 @@ var APP = {
 			APP.canvas = document.createElement('canvas');
 			APP.canvas.width = APP.props.width;
 			APP.canvas.height = APP.props.height;
-			APP.context = APP.canvas.getContext('2d');
+			APP.canvas.context = APP.canvas.getContext('2d');
 			document.getElementById(targetID).appendChild(APP.canvas);
 			APP.stage = new createjs.Stage(APP.canvas);
 
 			// Setting bounds so CreateJS doesn't keep calculating them.
 			APP.stage.setBounds(0, 0, APP.props.width, APP.props.height);
+
+			APP.cnvBG = document.createElement('canvas');
+			APP.cnvBG.width = APP.props.width;
+			APP.cnvBG.height = APP.props.height;
+			APP.cnvBG.context = APP.cnvBG.getContext('2d');
+			APP.cnvBG.classList.add('ref')
+			document.getElementById(targetID).appendChild(APP.cnvBG);
+
 		},
 		addListeners: function() {
 			// Visibility API
@@ -268,6 +276,7 @@ var APP = {
 	updateObjects : function(elapsed) {
 		//console.log('updateObjects()');
 		//APP.stage.children[0].x ++;
+
 	},
 	hexToRgb : function(hex) {
 		var bigint = parseInt(hex, 16);

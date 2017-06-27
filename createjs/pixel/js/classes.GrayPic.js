@@ -28,6 +28,9 @@ var classes = classes || {}; // Giving a namespace to the class we're creating. 
 	// so we could give this a shorter variable name if we wanted to.
 	GrayPic.prototype = createjs.extend(GrayPic, createjs.Bitmap);
 
+	GrayPic.prototype.method = function() {
+
+	}
 
 
 	/*
@@ -37,5 +40,4 @@ var classes = classes || {}; // Giving a namespace to the class we're creating. 
 	*/
 	
 	classes.GrayPic = createjs.promote(GrayPic, "Bitmap");
-
 }());
