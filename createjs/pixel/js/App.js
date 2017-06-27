@@ -132,7 +132,7 @@ var APP = {
 			});
 
 
-			// COLOR PICKER CODE
+			// COLOR PICKER CODE: http://jscolor.com/
 			document.getElementById('color-picker').addEventListener('change', function(event) {
 				console.log('Changed. Color is: ' + event.target.value + ', rgb: ' + APP.hexToRgb(event.target.value) );
 			});
