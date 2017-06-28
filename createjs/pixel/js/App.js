@@ -7,6 +7,8 @@ Page Visibility API and Polyfill for vendor prefixes:
 	http://www.w3.org/TR/page-visibility/
 	http://caniuse.com/#feat=pagevisibility
 	http://jsfiddle.net/0GiS0/cAG5N/
+	https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API/Tutorial/Pixel_manipulation_with_canvas
+	https://codepen.io/jakealbaugh/post/canvas-image-pixel-manipulation
 */
 
 var APP = {
@@ -15,12 +17,13 @@ var APP = {
 		READY: "READY"
 	},
 	currentState: 'INIT',
+	layers:{},
 	props: {
 		now:null,				// "now" and "then" get initial values in APP.setup.addListeners().
 		then:null,
 		interval:0,
-		width:946,				// Width of our canvas app. Used when creating the canvas and testing its bounds.
-		height:710,				// Height of our canvas app.
+		width:500,				// Width of our canvas app. Used when creating the canvas and testing its bounds.
+		height:375,				// Height of our canvas app.
 		textColor: '#FFFD8A',
 		keycodes: {
 			SPACE: 32,
@@ -32,6 +35,7 @@ var APP = {
 		assets: [
 			{id:"canvas_book", src:"img/html5-canvas-book.jpg"},
 			{id:"lynda", src:"img/lynda-logo-square-200.gif"},
+			{id:"gradient", src:"img/gradient.png"},
 			{id:"curiosity", src:"img/curiosity-tars-tarkas.jpg"},
 			{id:"ie6_old", src:"img/ie6-old.png"}
 			],
@@ -121,7 +125,6 @@ var APP = {
 			APP.cnvBG.context = APP.cnvBG.getContext('2d');
 			APP.cnvBG.classList.add('ref')
 			document.getElementById(targetID).appendChild(APP.cnvBG);
-
 		},
 		addListeners: function() {
 			// Visibility API
@@ -142,7 +145,9 @@ var APP = {
 
 			// COLOR PICKER CODE: http://jscolor.com/
 			document.getElementById('color-picker').addEventListener('change', function(event) {
-				console.log('Changed. Color is: ' + event.target.value + ', rgb: ' + APP.hexToRgb(event.target.value) );
+				//var colors = APP.hexToRgb(event.target.value);
+				//console.log('Changed. Color is: ' + event.target.value + ', rgb(' + colors.r + "," + colors.g + "," + colors.b + ')');
+				APP.changeColor(event.target.value);
 			});
 
 			// http://stackoverflow.com/questions/1402698/binding-arrow-keys-in-js-jquery
@@ -222,16 +227,28 @@ var APP = {
 			APP.stage.addChild(APP.props.fpsText);
 			*/
 
-			var bigPic = new classes.GrayPic( {
-				canvas:APP.canvas, 
-				id:APP.props.assets[2].id, 
-				x:0, 
-				y:0, 
-				width:APP.props.assets[2].width,
-				height:APP.props.assets[2].height,
-				src:APP.props.assets[2].src
-			} );
-			APP.stage.addChild(bigPic);
+			var layers = APP.layers;
+			layers.gradLeft = new createjs.Bitmap(APP.queue.getResult('gradient'));
+			layers.gradRight = new createjs.Bitmap(APP.queue.getResult('gradient'));
+			layers.curiosity = new createjs.Bitmap(APP.queue.getResult('curiosity'));
+
+			layers.gradRight.x = layers.gradRight.regX = layers.gradRight.image.width/1.5;
+			layers.gradRight.y = layers.gradRight.regY = layers.gradRight.image.height/2;
+			layers.gradRight.rotation = 180;
+
+
+			layers.gradLeft.scaleX = layers.gradRight.scaleX = .5;
+			layers.gradLeft.alpha = layers.gradRight.alpha = .75;
+
+
+
+			var ratio = APP.canvas.width / layers.curiosity.image.width;
+			layers.curiosity.scaleX = layers.curiosity.scaleY = ratio;
+
+
+
+			// Add things to the stage.
+			APP.stage.addChild(layers.curiosity, layers.gradLeft, layers.gradRight);
 		}
 	},
 	tick: function(event) {
@@ -284,8 +301,51 @@ var APP = {
 		var g = (bigint >> 8) & 255;
 		var b = bigint & 255;
 
-		return r + "," + g + "," + b;
+		//return r + "," + g + "," + b;
+		return {r:r, g:g, b:b};
+	},
+	changeColor : function(hex) {
+		console.log('changeColor()');
+		APP.cnvBG.width = APP.cnvBG.width;
+
+		var color = APP.hexToRgb(hex),
+			contextBG = APP.cnvBG.context;
+
+		APP.layers.gradLeft.draw(APP.cnvBG.context);
+
+		var imageData = contextBG.getImageData(0,0,APP.cnvBG.width,APP.cnvBG.height)
+
+		var data = imageData.data;
+
+
+		for (var i = 0; i < data.length; i += 4) {
+			data[i]     = color.r;     // red
+			data[i + 1] = color.g; // green
+			data[i + 2] = color.b; // blue
+		}
+		APP.cnvBG.context.putImageData(imageData, 0, 0);
 	}
 };
 
 APP.init('canvasContainer');
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
