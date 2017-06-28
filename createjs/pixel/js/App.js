@@ -35,7 +35,8 @@ var APP = {
 		assets: [
 			{id:"canvas_book", src:"img/html5-canvas-book.jpg"},
 			{id:"lynda", src:"img/lynda-logo-square-200.gif"},
-			{id:"gradient", src:"img/gradient.png"},
+			{id:"gradient-left", src:"img/gradient-left.png"},
+			{id:"gradient-right", src:"img/gradient-right.png"},
 			{id:"curiosity", src:"img/curiosity-tars-tarkas.jpg"},
 			{id:"ie6_old", src:"img/ie6-old.png"}
 			],
@@ -109,22 +110,20 @@ var APP = {
 	},
 	setup: {
 		createCanvas: function(targetID) {
-			APP.canvas = document.createElement('canvas');
-			APP.canvas.width = APP.props.width;
-			APP.canvas.height = APP.props.height;
+			APP.canvas = document.getElementById('base');
 			APP.canvas.context = APP.canvas.getContext('2d');
-			document.getElementById(targetID).appendChild(APP.canvas);
+
+			APP.cnvGL = document.getElementById('gradient-left');
+			APP.cnvGL.context = APP.cnvGL.getContext('2d');
+
+			APP.cnvGR = document.getElementById('gradient-right');
+			APP.cnvGR.context = APP.cnvGR.getContext('2d');
+
 			APP.stage = new createjs.Stage(APP.canvas);
 
 			// Setting bounds so CreateJS doesn't keep calculating them.
 			APP.stage.setBounds(0, 0, APP.props.width, APP.props.height);
 
-			APP.cnvBG = document.createElement('canvas');
-			APP.cnvBG.width = APP.props.width;
-			APP.cnvBG.height = APP.props.height;
-			APP.cnvBG.context = APP.cnvBG.getContext('2d');
-			APP.cnvBG.classList.add('ref')
-			document.getElementById(targetID).appendChild(APP.cnvBG);
 		},
 		addListeners: function() {
 			// Visibility API
@@ -144,11 +143,15 @@ var APP = {
 
 
 			// COLOR PICKER CODE: http://jscolor.com/
-			document.getElementById('color-picker').addEventListener('change', function(event) {
-				//var colors = APP.hexToRgb(event.target.value);
-				//console.log('Changed. Color is: ' + event.target.value + ', rgb(' + colors.r + "," + colors.g + "," + colors.b + ')');
-				APP.changeColor(event.target.value);
+			document.getElementById('color-picker-left').addEventListener('change', function(event) {
+				APP.changeColor(event.target.value, 'left');
 			});
+
+			document.getElementById('color-picker-right').addEventListener('change', function(event) {
+				APP.changeColor(event.target.value, 'right');
+			});
+
+
 
 			// http://stackoverflow.com/questions/1402698/binding-arrow-keys-in-js-jquery
 			document.onkeydown = function(event) {
@@ -228,17 +231,24 @@ var APP = {
 			*/
 
 			var layers = APP.layers;
-			layers.gradLeft = new createjs.Bitmap(APP.queue.getResult('gradient'));
-			layers.gradRight = new createjs.Bitmap(APP.queue.getResult('gradient'));
+			layers.gradLeft = new createjs.Bitmap(APP.queue.getResult('gradient-left'));
+			layers.gradRight = new createjs.Bitmap(APP.queue.getResult('gradient-right'));
 			layers.curiosity = new createjs.Bitmap(APP.queue.getResult('curiosity'));
 
-			layers.gradRight.x = layers.gradRight.regX = layers.gradRight.image.width/1.5;
-			layers.gradRight.y = layers.gradRight.regY = layers.gradRight.image.height/2;
-			layers.gradRight.rotation = 180;
+
+			layers.gradLeft.draw(APP.cnvGL.context);
+			layers.gradRight.draw(APP.cnvGR.context);
 
 
-			layers.gradLeft.scaleX = layers.gradRight.scaleX = .5;
-			layers.gradLeft.alpha = layers.gradRight.alpha = .75;
+
+
+			//layers.gradRight.x = layers.gradRight.regX = layers.gradRight.image.width/1.5;
+			//layers.gradRight.y = layers.gradRight.regY = layers.gradRight.image.height/2;
+			//layers.gradRight.rotation = 180;
+
+
+			//layers.gradLeft.scaleX = layers.gradRight.scaleX = .5;
+			//layers.gradLeft.alpha = layers.gradRight.alpha = .75;
 
 
 
@@ -248,7 +258,8 @@ var APP = {
 
 
 			// Add things to the stage.
-			APP.stage.addChild(layers.curiosity, layers.gradLeft, layers.gradRight);
+			//APP.stage.addChild(layers.curiosity, layers.gradLeft, layers.gradRight);
+			APP.stage.addChild(layers.curiosity);
 		}
 	},
 	tick: function(event) {
@@ -304,16 +315,39 @@ var APP = {
 		//return r + "," + g + "," + b;
 		return {r:r, g:g, b:b};
 	},
+	changeColor : function(hex, side) {
+		var color = APP.hexToRgb(hex),
+			//source = (side === 'right') ? APP.layers.gradRight : APP.layers.gradLeft ;
+			target = (side && side === 'right') ? APP.cnvGR : APP.cnvGL ;
+
+		var imageData = target.context.getImageData(0,0,target.width,target.height)
+		var data = imageData.data;
+
+		for (var i = 0; i < data.length; i += 4) {
+			data[i]     = color.r;     // red
+			data[i + 1] = color.g; // green
+			data[i + 2] = color.b; // blue
+		}
+		target.context.putImageData(imageData, 0, 0);
+	}
+};
+
+APP.init('canvasContainer');
+
+
+
+
+/*
 	changeColor : function(hex) {
 		console.log('changeColor()');
-		APP.cnvBG.width = APP.cnvBG.width;
+		APP.cnvGR.width = APP.cnvGR.width;
 
 		var color = APP.hexToRgb(hex),
-			contextBG = APP.cnvBG.context;
+			contextBG = APP.cnvGR.context;
 
-		APP.layers.gradLeft.draw(APP.cnvBG.context);
+		APP.layers.gradLeft.draw(APP.cnvGR.context);
 
-		var imageData = contextBG.getImageData(0,0,APP.cnvBG.width,APP.cnvBG.height)
+		var imageData = contextBG.getImageData(0,0,APP.cnvGR.width,APP.cnvGR.height)
 
 		var data = imageData.data;
 
@@ -323,17 +357,9 @@ var APP = {
 			data[i + 1] = color.g; // green
 			data[i + 2] = color.b; // blue
 		}
-		APP.cnvBG.context.putImageData(imageData, 0, 0);
+		APP.cnvGR.context.putImageData(imageData, 0, 0);
 	}
-};
-
-APP.init('canvasContainer');
-
-
-
-
-
-
+*/
 
 
 

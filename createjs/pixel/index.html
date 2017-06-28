@@ -3,13 +3,22 @@
 	<head>
 		<title>CreateJS Starter Template</title>
 		<style>
+			.canvasContainer {
+				height:375px;
+				position:relative;
+			}
 			canvas, .color-picker-wrap {
 				display:block;
 				margin: 0 auto;
 			}
 			canvas {
 				max-width: 100%;
-				height:auto;
+			}
+			.gradient {
+				position: absolute;
+				top:0;
+				left:50%;
+				margin-left:-250px;
 			}
 			.color-picker-wrap {
 				text-align: center;
@@ -21,8 +30,18 @@
 		</style>
 	</head>
 	<body>
-		<div class="color-picker-wrap">Color: <input id="color-picker" class="jscolor" value="ab2567"></div>
-		<div id="canvasContainer"></div>
+		<div class="color-picker-wrap">
+			Color: <input id="color-picker-left" class="jscolor" value="ab2567">&nbsp;&nbsp;&nbsp;Color: <input id="color-picker-right" class="jscolor" value="ab2567">
+		</div>
+
+
+		<div id="canvasContainer" class="canvasContainer">
+			<canvas width="500" height="375" id="base" class="base"></canvas>
+			<canvas width="500" height="375" id="gradient-left" class="gradient gradient-left"></canvas>
+			<canvas width="500" height="375" id="gradient-right" class="gradient gradient-right"></canvas>
+		</div>
+
+
 		<script src="../../vendor/jscolor-2.0.4/jscolor.min.js"></script>
 		<script src="js/createjs-2015.05.21.min.js"></script>
 		<script src="js/classes.GrayPic.js"></script>
